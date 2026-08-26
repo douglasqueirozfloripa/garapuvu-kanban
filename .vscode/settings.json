@@ -8,6 +8,9 @@
     "editor.tabCompletion": "onlySnippets",
     "editor.wordBasedSuggestions": "off"
   },
+  // SDK do Flutter usado NESTE projeto (terminal, analisador e debug do
+  // VS Code). Fixado aqui para nao herdar o SDK de outro projeto.
+  "dart.flutterSdkPath": "/Users/douglasqueiroz/flutter",
   "dart.lineLength": 80,
   "dart.previewFlutterUiGuides": true,
   "files.trimTrailingWhitespace": true,

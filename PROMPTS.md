@@ -445,6 +445,61 @@ do quadro.
 
 ---
 
+## Conserto 4.1 — o build do Android voltou a funcionar ✅ executado
+
+```
+make rodar  ->  Error: Gradle task assembleDebug failed with exit code 1
+A problem occurred configuring project ':shared_preferences_android'.
+> Parameter specified as non-null is null: method
+  com.flutter.gradle.VersionUtils.mostRecentSemanticVersion, parameter version1
+```
+
+**O que estava acontecendo:** havia **dois SDKs do Flutter** no computador, e o
+projeto usava um em cada lugar.
+
+| Onde | SDK que estava sendo usado |
+| --- | --- |
+| Terminal comum (`flutter --version`) | `~/flutter` — **3.24.5** |
+| Terminal *de dentro do VS Code* | `.../DirtLockerApp2/lib/flutter` — **3.32.0** |
+| Gradle (`android/local.properties`) | `.../DirtLockerApp2/lib/flutter` — **3.32.0** |
+
+A extensão Dart do VS Code tinha, nas configurações globais do editor, um
+`dart.flutterSdkPath` apontando para o SDK **de outro projeto**; ela coloca esse
+SDK na frente do `PATH` do terminal integrado. Ou seja: `make rodar` rodado
+dentro do VS Code chamava um Flutter diferente do que a mesma pessoa via ao
+digitar `flutter --version` num terminal normal.
+
+**Por que isso quebrou o build:** o Flutter 3.32 exige `Android Gradle Plugin`
+**8.3 ou maior** (o próprio log avisava isso) e este projeto foi montado no
+padrão do 3.24, com **AGP 8.1.0**. No AGP 8.1 um plugin que não declara
+`ndkVersion` — o caso do `shared_preferences_android` — devolve `null`, e o
+plugin Gradle do 3.32 (escrito em Kotlin) explode ao comparar essa versão. O
+plugin Gradle do 3.24 é outro (Groovy) e não faz essa comparação.
+
+**Sintoma extra:** o `flutter pub get` de cada SDK reescrevia o `pubspec.lock`
+com resoluções diferentes (o `sky_engine` alternando entre `0.0.99` e `0.0.0`) —
+por isso o arquivo vivia aparecendo como modificado no `git status`.
+
+### O conserto
+
+| Arquivo | Mudança |
+| --- | --- |
+| `.vscode/settings.json` | `"dart.flutterSdkPath": "/Users/douglasqueiroz/flutter"` — fixa o SDK **deste** projeto e vence a configuração global do editor, sem atrapalhar o outro projeto |
+| `android/local.properties` | `flutter.sdk` apontando para `~/flutter` (é o arquivo que o Gradle lê; não vai para o git) |
+| `pubspec.lock` | restaurado para a versão commitada e regerado com o 3.24.5 |
+
+Nada foi mexido no código do app, nem no `AGP`, nem no `Gradle`. Um SDK só,
+usado em todo lugar.
+
+**Atenção:** a mudança do `PATH` do terminal do VS Code só vale em terminais
+**abertos depois** — se o `make rodar` ainda falhar, feche a aba do terminal e
+abra outra (ou recarregue a janela do VS Code).
+
+**Resultado:** `flutter build apk --debug` verde, app instalado e rodando no
+emulador Android. Placar: **156 testes verdes** (`make check` completo).
+
+---
+
 ## Equivalências web → Flutter (por que o roteiro mudou de ferramenta)
 
 O roteiro original do ia-na-pratica é web. Este projeto é Flutter. As **regras**
@@ -759,6 +814,7 @@ implemente ainda — só o plano, para eu escolher os 3 primeiros.
 - [x] **Prompt 3.5** — app rodando nos emuladores + `make rodar` / `make parar`.
 - [x] **Prompt 3.6** — ícone do app (Android e iOS) com a flor do Garapuvu.
 - [x] **Prompt 4** — persistência (`shared_preferences`).
+- [x] **Conserto 4.1** — build do Android consertado (dois SDKs do Flutter brigando).
 - [ ] **Prompt 5** — lista por prioridade.
 - [ ] **Prompt 6** — quadro Kanban (avança/volta).
 - [ ] **Prompt 7** — dashboard.

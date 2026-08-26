@@ -312,3 +312,29 @@
 - **Artefato de build** — cada arquivo gerado pelo build (`.apk`, `.aab`,
   `.ipa`, pasta `build/web/`); `make artefatos` mostra quais já existem.
 
+## Do ambiente (quando o build quebra sem ninguém ter mexido no código)
+
+- **SDK do Flutter** — a pasta com o Flutter inteiro (o comando `flutter`, as
+  bibliotecas, o plugin do Gradle). Dá para ter **mais de uma** no computador, e
+  aí é preciso deixar claro qual vale para cada projeto.
+- **`PATH`** — a lista de pastas que o terminal percorre para achar um comando.
+  Quem aparece **primeiro** ganha; por isso dois SDKs instalados podem fazer
+  `flutter` significar coisas diferentes em terminais diferentes.
+- **`dart.flutterSdkPath`** — configuração do VS Code que escolhe o SDK do
+  Flutter. Colocada no `.vscode/settings.json` do projeto, vale **só ali** e
+  vence a configuração global do editor.
+- **`android/local.properties`** — arquivinho, **não versionado**, onde o Gradle
+  lê onde está o SDK do Android (`sdk.dir`) e o do Flutter (`flutter.sdk`). É
+  regravado pelo próprio comando `flutter`.
+- **AGP (*Android Gradle Plugin*)** — o plugin que ensina o Gradle a montar apps
+  Android. Cada versão do Flutter exige uma faixa de versões do AGP; misturar
+  Flutter novo com AGP antigo quebra o build.
+- **`ndkVersion`** — versão do kit de código nativo (C/C++) do Android. Quando um
+  plugin não declara a sua, versões antigas do AGP devolvem "nada" — e o Flutter
+  novo não espera esse "nada".
+- **`pubspec.lock`** — a lista congelada das versões exatas de cada dependência.
+  Cada SDK do Flutter resolve essa lista à sua maneira, então dois SDKs
+  alternando deixam o arquivo mudando sozinho a cada `pub get`.
+- **`flutter clean`** — apaga a pasta `build/`. Resolve restos de build antigo —
+  e, de quebra, apaga os logs de `make rodar`, o que faz um `tail -f` aberto
+  parecer travado.
