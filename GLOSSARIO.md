@@ -312,6 +312,30 @@
 - **Artefato de build** — cada arquivo gerado pelo build (`.apk`, `.aab`,
   `.ipa`, pasta `build/web/`); `make artefatos` mostra quais já existem.
 
+## Da lista de tarefas (Prompt 5)
+
+- **Estado vazio** — o que a tela mostra quando ainda não há nada para mostrar.
+  Neste projeto ele nunca é só "nenhuma tarefa": explica o que vai aparecer ali
+  e traz o botão da ação (regra 6.6).
+- **Etiqueta (ou *chip*)** — o retângulo arredondado com uma informação curta,
+  como "Alta" ou "A fazer". Aqui ela sempre carrega **texto**, e não só cor.
+- **`ListView.separated`** — a lista do Flutter que desenha só o que cabe na
+  tela e insere um espaço fixo entre um item e o seguinte. É o que garante a
+  folga entre os cartões sem cada cartão precisar saber quem vem depois.
+- **`Semantics`** — o rótulo invisível que o leitor de tela lê em voz alta. Sem
+  `container: true`, ele se **funde** com os vizinhos e o leitor anuncia tudo
+  numa frase só.
+- **`ColorScheme.fromSeed`** — a função que deriva uma paleta inteira a partir
+  de uma cor. Os tons `*Container` saem da cor-semente e **não** dos papéis que
+  o tema fixa por cima — foi por isso que as cores da prioridade nasceram
+  trocadas.
+- **`Flexible`** — o widget que deixa um filho encolher quando o espaço aperta,
+  em vez de estourar a linha. É ele que segura um nome de responsável comprido.
+- **`TextOverflow.ellipsis`** — quando o texto não cabe, termina em "..." em vez
+  de ser cortado no meio de uma letra.
+- **Teste de espaçamento** — compara os retângulos de dois elementos vizinhos e
+  exige folga maior que 0,5 dp entre eles (regra 6.5).
+
 ## Do ambiente (quando o build quebra sem ninguém ter mexido no código)
 
 - **SDK do Flutter** — a pasta com o Flutter inteiro (o comando `flutter`, as

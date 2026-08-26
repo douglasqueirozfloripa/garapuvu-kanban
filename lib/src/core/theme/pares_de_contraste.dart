@@ -97,9 +97,18 @@ List<ParDeCores> paresDoTema(ColorScheme esquema) {
     ),
     ParDeCores(
       nome: 'secondaryContainer / onSecondaryContainer',
-      onde: 'Etiqueta de coluna e de prioridade selecionada',
+      onde: 'Etiqueta de coluna e de prioridade media',
       fundo: esquema.secondaryContainer,
       texto: esquema.onSecondaryContainer,
+    ),
+    // A etiqueta de prioridade usa tres pares — um por nivel. Os de prioridade
+    // alta (errorContainer) e baixa (secondaryContainer) ja estavam nesta
+    // lista; o da media entrou junto com a lista do Prompt 5.
+    ParDeCores(
+      nome: 'tertiaryContainer / onTertiaryContainer',
+      onde: 'Etiqueta de prioridade baixa',
+      fundo: esquema.tertiaryContainer,
+      texto: esquema.onTertiaryContainer,
     ),
     ParDeCores(
       nome: 'surfaceContainerHighest / onSurface',

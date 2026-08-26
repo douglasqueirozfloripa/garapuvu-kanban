@@ -9,6 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final DateTime _base = DateTime(2026, 8, 26, 9);
 
+/// Idade da tarefa em dias, para as chamadas de teste caberem numa linha.
+Duration _dias(int quantos) => Duration(days: quantos);
+
+/// Apelido curto para a ultima coluna, pelo mesmo motivo de [_dias].
+const Status _fim = Status.concluido;
+
 Tarefa _tarefa(
   String id, {
   Status status = Status.aFazer,
@@ -333,6 +339,83 @@ void main() {
       );
       await outra.carregar();
       expect(outra.tarefas, isEmpty);
+    });
+  });
+
+  // A ordem da lista e a regra de negocio 4. Ela ja e testada em Dart puro
+  // (regras_quadro_test.dart); aqui o que se testa e o CONTRATO do controller:
+  // que a tela recebe a lista ja ordenada e nao precisa ordenar de novo.
+  group('emOrdemDePrioridade', () {
+    test('poe as urgentes primeiro, atravessando as colunas', () async {
+      final QuadroController c = await _controller(
+        jaGravadas: <Tarefa>[
+          _tarefa('baixa', prioridade: Prioridade.baixa),
+          _tarefa('alta-fim', prioridade: Prioridade.alta, status: _fim),
+          _tarefa('media', prioridade: Prioridade.media),
+        ],
+      );
+      await c.carregar();
+
+      expect(
+        c.emOrdemDePrioridade.map((Tarefa t) => t.id).toList(),
+        <String>['alta-fim', 'media', 'baixa'],
+        reason:
+            'A pergunta e "o que e mais urgente", nao "em que coluna esta": '
+            'uma tarefa alta continua no topo mesmo ja concluida.',
+      );
+    });
+
+    test('no empate de prioridade, a mais antiga vem primeiro', () async {
+      final QuadroController c = await _controller(
+        jaGravadas: <Tarefa>[
+          _tarefa('nova', prioridade: Prioridade.alta, idade: _dias(2)),
+          _tarefa('antiga', prioridade: Prioridade.alta),
+          _tarefa('meio', prioridade: Prioridade.alta, idade: _dias(1)),
+        ],
+      );
+      await c.carregar();
+
+      expect(
+        c.emOrdemDePrioridade.map((Tarefa t) => t.id).toList(),
+        <String>['antiga', 'meio', 'nova'],
+        reason: 'Sem o desempate por data, a lista trocaria de ordem sozinha '
+            'a cada vez que o app abrisse.',
+      );
+    });
+
+    test('sem tarefas, devolve lista vazia em vez de estourar', () async {
+      final QuadroController c = await _controller();
+      await c.carregar();
+
+      expect(c.emOrdemDePrioridade, isEmpty);
+    });
+
+    test('ordenar nao reordena o quadro por baixo dos panos', () async {
+      final QuadroController c = await _controller(
+        jaGravadas: <Tarefa>[
+          _tarefa('baixa', prioridade: Prioridade.baixa),
+          _tarefa('alta', prioridade: Prioridade.alta),
+        ],
+      );
+      await c.carregar();
+
+      final List<String> antes = c.tarefas.map((Tarefa t) => t.id).toList();
+      c.emOrdemDePrioridade;
+
+      expect(
+        c.tarefas.map((Tarefa t) => t.id).toList(),
+        antes,
+        reason: 'Ler a lista ordenada nao pode mexer na lista guardada: '
+            'ordenar no lugar faria uma tela mudar a ordem de outra.',
+      );
+    });
+
+    test('a lista devolvida acompanha a tarefa recem-criada', () async {
+      final QuadroController c = await _controller();
+      await c.carregar();
+      await c.adicionar(_tarefa('nova', prioridade: Prioridade.alta));
+
+      expect(c.emOrdemDePrioridade.single.id, 'nova');
     });
   });
 }

@@ -512,6 +512,57 @@ emulador Android. Placar: **156 testes verdes** (`make check` completo).
 
 ---
 
+## Prompt 5 — Lista organizada por prioridade ✅ executado
+
+```
+Rode o Prompt 5: a lista. Monte a tela que mostra as tarefas ordenadas por
+prioridade (empate desempata por data de criação), com o chip de prioridade
+colorido e legendado por texto — cor nunca é a única informação. Inclua o estado
+vazio explicando o que fazer e com o botão de criar a primeira tarefa. Widget
+tests nos 3 tamanhos + teste de espaçamento + screenshot.
+```
+
+**Resultado:** a tela **Tarefas do time** mostra o quadro inteiro em uma lista
+só, da mais urgente para a menos urgente. Placar: **185 testes verdes**
+(29 novos). Prints em `docs/screenshots/p5-lista-por-prioridade.png` e
+`p5-lista-estado-vazio.png`.
+
+### Decisões de projeto
+
+| Decisão | Por quê |
+| --- | --- |
+| A lista atravessa as **quatro colunas**, sem separar | A pergunta que ela responde é "o que é mais urgente agora?", e essa resposta não muda de acordo com a coluna. A visão por coluna é o quadro do Prompt 6 |
+| Quem ordena é a **regra**, não a tela | `QuadroController.emOrdemDePrioridade` só repassa `ordenarPorPrioridade`. Se a tela ordenasse, a próxima tela ordenaria de outro jeito |
+| A etiqueta de prioridade carrega **três** pistas | Texto ("Alta"), ícone com direção própria e cor. Tire a cor e ela continua legível — é exatamente o que o teste `a prioridade vem ESCRITA, e nao so em cor` exige |
+| Vermelho → âmbar → verde, nessa ordem | É a leitura de semáforo que a maioria das pessoas já traz de fora do app |
+| Responsável, coluna e estimativa ficam **sem cor de fundo** | Se tudo fosse colorido, a prioridade — que é o que ordena a lista — deixaria de saltar aos olhos |
+| Cabeçalho **dentro** do `ListView` | Em 320 dp com fonte a 200% ele sozinho ocupa boa parte da tela; fora da lista, ficaria travado ocupando espaço |
+| O fluxo "Nova tarefa" virou função (`abrirCadastroDeTarefa`) | Duas telas precisam dele. Duplicado, uma delas esqueceria de gravar ou de confirmar quando o código mudasse |
+| O cartão **não tem botão** ainda | Mover a tarefa de coluna é o Prompt 6. Um cartão que parecesse tocável e não fizesse nada seria um beco (regra 6.6) |
+
+### Dois defeitos que só o print pegou
+
+1. **As cores da prioridade saíram invertidas.** "Média" nasceu verde e "Baixa"
+   âmbar, porque `ColorScheme.fromSeed` deriva os `*Container` da cor-semente e
+   **não** dos papéis `secondary`/`tertiary` que o tema fixa por cima. Os dois
+   pares passavam no contraste, e nenhum teste reprovava — só o app rodando
+   mostrou que a leitura ficava trocada.
+2. **O leitor de tela lia tudo numa frase só.** Um `Semantics` com rótulo, mas
+   sem `container: true`, se **funde** com os vizinhos: em vez de "prioridade
+   alta", o leitor anunciava a etiqueta, o responsável e a coluna emendados.
+
+### Um detalhe de teste
+
+Para conferir o estado "lendo o aparelho" foi preciso um `_RepositorioTravado`
+— um repositório cuja leitura só termina quando o teste manda. Com o
+repositório de verdade, a leitura acaba **antes** de a tela ser montada, e o
+estado nunca apareceria no teste.
+
+**Próximo passo:** Prompt 6 — o quadro em colunas, com a tarefa avançando e
+voltando de status.
+
+---
+
 ## Equivalências web → Flutter (por que o roteiro mudou de ferramenta)
 
 O roteiro original do ia-na-pratica é web. Este projeto é Flutter. As **regras**
@@ -827,7 +878,7 @@ implemente ainda — só o plano, para eu escolher os 3 primeiros.
 - [x] **Prompt 3.6** — ícone do app (Android e iOS) com a flor do Garapuvu.
 - [x] **Prompt 4** — persistência (`shared_preferences`).
 - [x] **Conserto 4.1** — build do Android consertado (dois SDKs do Flutter brigando).
-- [ ] **Prompt 5** — lista por prioridade.
+- [x] **Prompt 5** — lista por prioridade.
 - [ ] **Prompt 6** — quadro Kanban (avança/volta).
 - [ ] **Prompt 7** — dashboard.
 - [ ] **Prompt 8** — filtros persistidos.

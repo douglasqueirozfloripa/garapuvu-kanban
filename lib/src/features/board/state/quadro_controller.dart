@@ -46,6 +46,16 @@ class QuadroController extends ChangeNotifier {
   /// Vem do repositorio (dado danificado) ou das regras (limite de WIP).
   String? get aviso => _aviso;
 
+  /// **Todas** as tarefas do quadro na ordem em que a lista as mostra:
+  /// prioridade primeiro e, no empate, a mais antiga na frente (regra de
+  /// negocio 4).
+  ///
+  /// E uma lista so, atravessando as quatro colunas de proposito: a pergunta
+  /// que ela responde e "o que e mais urgente agora?", e essa resposta nao
+  /// muda de acordo com a coluna. A visao separada por coluna e [daColuna], e
+  /// e ela que vira o quadro no Prompt 6.
+  List<Tarefa> get emOrdemDePrioridade => ordenarPorPrioridade(_tarefas);
+
   /// As tarefas de uma coluna, na ordem de prioridade (regra de negocio 4).
   List<Tarefa> daColuna(Status status) => ordenarPorPrioridade(
         _tarefas.where((Tarefa t) => t.status == status).toList(),

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tela_contraste.dart';
-import '../model/tarefa.dart';
-import '../state/quadro_controller.dart';
 import '../widgets/quantas_guardadas.dart';
+import 'abrir_cadastro_de_tarefa.dart';
 import 'tela_cadastro_tarefa.dart';
+import 'tela_lista_de_tarefas.dart';
 
 /// Tela inicial provisoria do Garapuvu Kanban.
 ///
@@ -128,15 +127,16 @@ class _CartaoProximoPasso extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Passo atual: Prompt 4 concluido',
+              'Passo atual: Prompt 5 concluido',
               style: tema.textTheme.titleMedium,
             ),
             const SizedBox(height: AppEspacos.sm),
             Text(
-              'As tarefas agora ficam guardadas no aparelho: elas continuam '
-              'aqui quando o app fecha e abre de novo. O proximo passo do '
-              'roteiro e o Prompt 5: mostrar a lista de tarefas em ordem de '
-              'prioridade.',
+              'A lista ja mostra as tarefas em ordem de prioridade, com o '
+              'estado vazio explicando o que fazer. Toque em '
+              '"${TelaListaDeTarefas.titulo}" para ver. O proximo passo do '
+              'roteiro e o Prompt 6: o quadro em colunas, onde a tarefa avanca '
+              'e volta de status.',
               style: tema.textTheme.bodyMedium,
             ),
             const SizedBox(height: AppEspacos.sm),
@@ -158,38 +158,6 @@ class _CartaoProximoPasso extends StatelessWidget {
 class _Acoes extends StatelessWidget {
   const _Acoes();
 
-  /// Abre o cadastro e, se uma tarefa voltar, confirma na tela.
-  ///
-  /// O `ScaffoldMessenger` e capturado ANTES do `await`: depois dele o
-  /// `context` pode nao valer mais, e usa-lo seria um bug silencioso.
-  static Future<void> _abrirCadastro(BuildContext context) async {
-    final ScaffoldMessengerState mensageiro = ScaffoldMessenger.of(context);
-    final NavigatorState navegador = Navigator.of(context);
-    final QuadroController quadro = context.read<QuadroController>();
-
-    final Tarefa? criada = await navegador.push<Tarefa>(
-      MaterialPageRoute<Tarefa>(
-        builder: (BuildContext _) => const TelaCadastroTarefa(),
-      ),
-    );
-
-    if (criada == null) {
-      return;
-    }
-
-    // A partir do Prompt 4 a tarefa e realmente gravada no aparelho.
-    await quadro.adicionar(criada);
-
-    mensageiro.showSnackBar(
-      SnackBar(
-        content: Text(
-          'Tarefa "${criada.titulo}" guardada neste aparelho para '
-          '${criada.responsavel}.',
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -199,9 +167,21 @@ class _Acoes extends StatelessWidget {
         SizedBox(
           height: AppEspacos.alvoDeToque,
           child: FilledButton.icon(
-            onPressed: () => _abrirCadastro(context),
+            onPressed: () => abrirCadastroDeTarefa(context),
             icon: const Icon(Icons.add),
             label: const Text(TelaCadastroTarefa.titulo),
+          ),
+        ),
+        SizedBox(
+          height: AppEspacos.alvoDeToque,
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext _) => const TelaListaDeTarefas(),
+              ),
+            ),
+            icon: const Icon(Icons.checklist),
+            label: const Text(TelaListaDeTarefas.titulo),
           ),
         ),
         SizedBox(

@@ -101,8 +101,20 @@ O que já existe:
   (celular pequeno, celular comum e tablet), com fonte ampliada em 200%, com
   verificação de contraste e de espaçamento entre elementos.
 
-O que **ainda não existe**: o quadro de verdade. Nenhuma tarefa pode ser criada
-ainda — isso começa no Prompt 2 (as regras) e aparece na tela no Prompt 3.
+- **A lista de tarefas.** A tela "Tarefas do time" mostra tudo o que o time tem
+  para fazer, **da mais urgente para a menos urgente** — e, quando duas tarefas
+  empatam na urgência, a mais antiga vem primeiro, para a lista não trocar de
+  ordem sozinha a cada vez que o app abre. Cada cartão diz o título, a
+  prioridade, quem se responsabilizou, em que coluna a tarefa está e a
+  estimativa de horas, quando existe. A prioridade aparece **escrita**, com
+  ícone e com cor: quem não distingue as três cores continua sabendo o que é
+  urgente. E quando não há tarefa nenhuma, a tela explica o que vai aparecer ali
+  e oferece o botão de criar a primeira, em vez de deixar a pessoa olhando para
+  o nada.
+
+O que **ainda não existe**: o quadro em colunas. Dá para ver a lista e criar
+tarefas, mas ainda não dá para **mover** uma tarefa de "A fazer" para "Fazendo"
+— isso é o Prompt 6.
 
 ## Como o projeto avança
 
@@ -116,8 +128,8 @@ Um passo de cada vez, sempre no mesmo formato:
 
 ## Próximo passo
 
-**Prompt 5 — a lista de tarefas.** Hoje a tela diz *quantas* tarefas estão
-guardadas, mas não mostra **quais**. O próximo passo monta a lista, já na ordem
-certa: as urgentes primeiro e, no empate, a mais antiga na frente. Com o estado
-vazio explicando o que fazer, para quem abre o app pela primeira vez não ficar
-olhando para o nada.
+**Prompt 6 — o quadro Kanban.** A lista já mostra o que é mais urgente, mas as
+tarefas ainda não **andam**: não dá para dizer "comecei isto" nem "terminei
+aquilo". O próximo passo monta o quadro em colunas, com a tarefa avançando e
+voltando uma coluna por vez — e com o limite de três tarefas em andamento por
+pessoa avisando, e explicando o porquê, quando alguém tenta pegar a quarta.
