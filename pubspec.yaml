@@ -1,0 +1,40 @@
+name: garapuvu_kanban
+description: >-
+  Quadro Scrum/Kanban do projeto social Garapuvu — organiza as tarefas do time
+  em colunas de status, com prioridade, responsavel e sprint. Os dados ficam
+  somente no aparelho.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Gerenciamento de estado recomendado pela documentacao oficial do Flutter
+  # para apps pequenos/medios: o controller e um ChangeNotifier e a arvore de
+  # widgets escuta as mudancas.
+  provider: ^6.1.2
+
+  # Equivalente ao localStorage da web: guarda o quadro inteiro como JSON no
+  # proprio aparelho. Nenhum dado sai daqui.
+  shared_preferences: ^2.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Testes ponta a ponta (o "Playwright" do Flutter).
+  integration_test:
+    sdk: flutter
+
+  # Regras de lint recomendadas pelo time do Flutter.
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  # assets:
+  #   - assets/images/

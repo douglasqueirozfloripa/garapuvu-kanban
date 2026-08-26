@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Hook de pre-commit — equivalente ao Husky do template web.
+# Roda em QUALQUER branch, antes de CADA commit.
+# Ative com: make prepare   (ou: git config core.hooksPath .githooks)
+set -euo pipefail
+
+echo "[pre-commit] 1/3 formatacao (dart format)..."
+if ! dart format --set-exit-if-changed . ; then
+  echo ""
+  echo "[pre-commit] BLOQUEADO: ha arquivos fora do padrao de formatacao."
+  echo "             Rode 'make format', confira o diff e faca o commit de novo."
+  exit 1
+fi
+
+echo "[pre-commit] 2/3 analise estatica (flutter analyze)..."
+if ! flutter analyze ; then
+  echo ""
+  echo "[pre-commit] BLOQUEADO: o analisador apontou problemas."
+  echo "             Corrija o que aparece acima e faca o commit de novo."
+  exit 1
+fi
+
+echo "[pre-commit] 3/3 testes (flutter test)..."
+if ! flutter test ; then
+  echo ""
+  echo "[pre-commit] BLOQUEADO: ha teste vermelho."
+  echo "             Codigo quebrado nao entra no historico. Conserte e tente de novo."
+  exit 1
+fi
+
+echo "[pre-commit] OK: formatado, analisado e testado. Commit liberado."

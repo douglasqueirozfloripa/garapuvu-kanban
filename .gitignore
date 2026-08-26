@@ -1,0 +1,64 @@
+# --- Dart / Flutter ---
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.dart.js
+*.info.json
+*.js_
+*.js.deps
+*.js.map
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock.bak
+
+# --- IDE ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.iml
+*.ipr
+*.iws
+
+# --- Android ---
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+*.jks
+*.keystore
+
+# --- iOS / macOS ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/flutter_export_environment.sh
+macos/Pods/
+**/DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# --- Web ---
+web/build/
+
+# --- Sistema operacional ---
+.DS_Store
+Thumbs.db
+
+# --- Resultados de teste ---
+# Pasta temporaria criada pelo Playwright ao tirar os prints das telas.
+.playwright-mcp/
+test-results/
+integration_test/reports/
+failures/
+*.timeline.json
+
+# --- Dados de exemplo exportados pelo app (LGPD: nada de dado real no repo) ---
+export-*.json
