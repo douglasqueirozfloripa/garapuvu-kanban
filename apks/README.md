@@ -31,12 +31,17 @@ Se você só quer conferir que o app iOS compila, sem assinar: `make build-ios`.
 ## Como gerar tudo de novo
 
 ```bash
-make build-android   # gera o .apk e o .aab em build/
-make build-ipa       # gera o .ipa (precisa de assinatura)
-make artefatos       # mostra quais arquivos já existem
+make apks                      # os três arquivos, já copiados para cá
+make apks VERSAO=0.2.0 NUMERO=2  # carimbando outra versão
 ```
 
-Depois é só copiar de `build/` para cá.
+O `make apks` põe o número da versão no nome do arquivo (ele sai do
+`version:` do `pubspec.yaml`, ou do `VERSAO=` que você passar) e não falha
+quando falta o certificado da Apple: nesse caso entrega o `.ipa` sem assinatura
+e diz isso na tela, em vez de parar tudo.
+
+Se preferir os comandos separados: `make build-android` (o `.apk` e o `.aab`),
+`make build-ipa` (o `.ipa` assinado), `make artefatos` (mostra o que já existe).
 
 ## Privacidade
 

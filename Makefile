@@ -5,12 +5,12 @@
 #   Emulador  : make emulador-android | emulador-ios
 #   Marca     : make icones
 #   Buildar   : make build | build-android | build-ios | build-web
-#   Publicar  : make build-deploy | build-ipa | artefatos
+#   Publicar  : make apks | build-deploy | build-ipa | artefatos
 #   Ajuda     : make ajuda   (lista todos os comandos com uma linha cada)
 
 .PHONY: prepare format lint test check e2e run clean bootstrap doctor ajuda \
         emulador-ios emulador-android rodar parar icones \
-        build build-local build-android build-ios build-ipa build-web \
+        build build-local build-android build-ios build-ipa build-web apks \
         build-deploy artefatos
 
 ## prepare: instala dependencias e ATIVA o hook de pre-commit (rode uma vez)
@@ -321,6 +321,12 @@ VERSAO ?=
 NUMERO ?=
 MARCA_VERSAO := $(if $(VERSAO),--build-name=$(VERSAO)) $(if $(NUMERO),--build-number=$(NUMERO))
 
+# Pasta e nomes dos arquivos instalaveis que o "make apks" entrega. A versao sai
+# do pubspec.yaml (version: 0.1.0+1 -> 0.1.0), a nao ser que voce passe VERSAO=.
+PASTA_APKS := apks
+NOME_APK   := garapuvu-kanban
+VERSAO_ARQUIVO = $(if $(VERSAO),$(VERSAO),$(shell sed -n 's/^version: *\([^+ ]*\).*/\1/p' pubspec.yaml))
+
 # Plataforma usada pelo "make build-local". O padrao e web porque compila em
 # qualquer maquina, sem depender do SDK do Android nem do Xcode.
 #   Exemplo:  make build-local PLATAFORMA=android
@@ -396,6 +402,39 @@ build-android:
 	flutter build apk --release $(MARCA_VERSAO)
 	flutter build appbundle --release $(MARCA_VERSAO)
 	@printf '\nOK Android:\n  APK: build/app/outputs/flutter-apk/app-release.apk\n  AAB: build/app/outputs/bundle/release/app-release.aab\n\n'
+
+## apks: gera .apk, .aab e .ipa em modo release e copia para apks/ ja com o
+##       numero da versao no nome. Sem certificado da Apple, o .ipa sai SEM
+##       assinatura (guarda e assina depois) em vez de o comando falhar.
+##       Para carimbar outra versao: make apks VERSAO=0.2.0 NUMERO=2
+apks:
+	$(call EXIGE_PASTA,android)
+	@mkdir -p $(PASTA_APKS)
+	@printf '\n==> Gerando os instalaveis da versao %s em %s/\n\n' "$(VERSAO_ARQUIVO)" "$(PASTA_APKS)"
+	@$(MAKE) --no-print-directory build-android
+	@cp build/app/outputs/flutter-apk/app-release.apk "$(PASTA_APKS)/$(NOME_APK)-$(VERSAO_ARQUIVO).apk"
+	@cp build/app/outputs/bundle/release/app-release.aab "$(PASTA_APKS)/$(NOME_APK)-$(VERSAO_ARQUIVO).aab"
+	@if [ "$$(uname -s)" != "Darwin" ]; then \
+	  printf '\n==> iPhone: pulado — o build de iOS so roda no macOS, com o Xcode.\n'; \
+	elif flutter build ipa --release $(MARCA_VERSAO); then \
+	  cp "$$(ls build/ios/ipa/*.ipa | head -1)" "$(PASTA_APKS)/$(NOME_APK)-$(VERSAO_ARQUIVO).ipa"; \
+	  rm -f "$(PASTA_APKS)/$(NOME_APK)-$(VERSAO_ARQUIVO)-SEM-ASSINATURA.ipa"; \
+	  printf '\n==> iPhone: .ipa ASSINADO, pronto para a App Store.\n'; \
+	else \
+	  printf '\n==> iPhone: este Mac nao tem certificado de assinatura da Apple.\n'; \
+	  printf '    Gerando o app sem assinatura — serve para guardar e assinar depois,\n'; \
+	  printf '    NAO para instalar num iPhone. Para assinar, veja apks/README.md.\n\n'; \
+	  flutter build ios --release --no-codesign $(MARCA_VERSAO) || exit 1; \
+	  rm -rf build/ios/empacotar; \
+	  mkdir -p build/ios/empacotar/Payload; \
+	  cp -R build/ios/iphoneos/Runner.app build/ios/empacotar/Payload/; \
+	  ( cd build/ios/empacotar && zip -qry ../sem-assinatura.ipa Payload ); \
+	  cp build/ios/sem-assinatura.ipa "$(PASTA_APKS)/$(NOME_APK)-$(VERSAO_ARQUIVO)-SEM-ASSINATURA.ipa"; \
+	  rm -f "$(PASTA_APKS)/$(NOME_APK)-$(VERSAO_ARQUIVO).ipa"; \
+	fi
+	@printf '\n== Pronto: %s/ ==\n\n' "$(PASTA_APKS)"
+	@ls -lh $(PASTA_APKS) | grep -v '^total' | awk '{printf "  %-46s %s\n", $$9, $$5}'
+	@printf '\nO apks/README.md explica para que serve cada arquivo.\n\n'
 
 ## build-web: gera o site do app (bonus: o time abre no navegador, sem instalar)
 build-web:

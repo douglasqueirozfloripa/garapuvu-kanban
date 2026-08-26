@@ -484,12 +484,24 @@ por isso o arquivo vivia aparecendo como modificado no `git status`.
 
 | Arquivo | Mudança |
 | --- | --- |
-| `.vscode/settings.json` | `"dart.flutterSdkPath": "/Users/douglasqueiroz/flutter"` — fixa o SDK **deste** projeto e vence a configuração global do editor, sem atrapalhar o outro projeto |
+| Configurações **globais** do VS Code | removido o `dart.flutterSdkPath` que apontava para o SDK do outro projeto — era ele a origem de tudo |
+| `.vscode/settings.json` do **outro** projeto | criado, com `"dart.flutterSdkPath": "lib/flutter"` — cada projeto passa a declarar o SDK **dele** |
 | `android/local.properties` | `flutter.sdk` apontando para `~/flutter` (é o arquivo que o Gradle lê; não vai para o git) |
 | `pubspec.lock` | restaurado para a versão commitada e regerado com o 3.24.5 |
 
 Nada foi mexido no código do app, nem no `AGP`, nem no `Gradle`. Um SDK só,
 usado em todo lugar.
+
+Este projeto **não** declara `dart.flutterSdkPath` nenhum: sem a configuração
+global atrapalhando, a extensão Dart acha o Flutter pelo `PATH` sozinha. Isso
+evita cravar um caminho de máquina (`/Users/fulano/...`) num repositório
+público, que quebraria para qualquer outra pessoa que clonasse.
+
+O caminho do outro projeto é **relativo** de propósito. A extensão Dart passa
+esse ajuste por uma função (`resolvePaths`) que entende `~/` e caminho relativo
+à pasta do projeto — então `lib/flutter` funciona em qualquer computador. Vale a
+pena conferir esse tipo de detalhe antes de confiar nele: `${workspaceFolder}`,
+por exemplo, **não** é resolvido nesse ajuste.
 
 **Atenção:** a mudança do `PATH` do terminal do VS Code só vale em terminais
 **abertos depois** — se o `make rodar` ainda falhar, feche a aba do terminal e

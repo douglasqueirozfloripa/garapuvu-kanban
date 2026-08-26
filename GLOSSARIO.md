@@ -322,7 +322,10 @@
   `flutter` significar coisas diferentes em terminais diferentes.
 - **`dart.flutterSdkPath`** — configuração do VS Code que escolhe o SDK do
   Flutter. Colocada no `.vscode/settings.json` do projeto, vale **só ali** e
-  vence a configuração global do editor.
+  vence a configuração global do editor. Aceita caminho **relativo** à pasta do
+  projeto e o atalho `~/` para a pasta pessoal — então dá para declará-la sem
+  cravar um caminho de máquina. Quando ninguém declara nada, a extensão acha o
+  Flutter pelo `PATH`, que é o que este projeto faz.
 - **`android/local.properties`** — arquivinho, **não versionado**, onde o Gradle
   lê onde está o SDK do Android (`sdk.dir`) e o do Flutter (`flutter.sdk`). É
   regravado pelo próprio comando `flutter`.
