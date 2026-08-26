@@ -109,11 +109,15 @@ flutter run -d web-server --web-port=8080
 Com o app aberto, `r` recarrega a mudança na hora (*hot reload*), `R` reinicia do
 zero e `q` encerra.
 
-### Como a tela inicial está hoje
+### Como o app está hoje
 
-| Computador / tablet | Celular |
+| Abertura | Tela inicial |
 | --- | --- |
-| ![Tela inicial no desktop](docs/screenshots/tela-inicial-desktop.png) | ![Tela inicial no celular](docs/screenshots/tela-inicial-mobile.png) |
+| ![Splash com a flor do garapuvu](docs/screenshots/p3-splash.png) | ![Tela inicial](docs/screenshots/p3-tela-inicial.png) |
+
+| Nova tarefa | Erro explicado | Relatório de contraste |
+| --- | --- | --- |
+| ![Formulário de nova tarefa](docs/screenshots/p3-cadastro.png) | ![Validação dos campos](docs/screenshots/p3-cadastro-validacao.png) | ![Relatório de contraste](docs/screenshots/p3-relatorio-contraste.png) |
 
 ---
 

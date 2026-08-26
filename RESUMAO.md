@@ -30,7 +30,7 @@ enviado para lugar nenhum.
 
 ## Em que pé o projeto está
 
-**Passo atual: Prompt 1 concluído.**
+**Passo atual: Prompt 4 concluído.**
 
 O que já existe:
 
@@ -55,6 +55,29 @@ O que já existe:
   prints estão em `docs/screenshots/`. As pastas do código já estão separadas em
   camadas: regras de negócio de um lado, telas do outro, guardar dados de um
   terceiro.
+- **As regras do quadro, em código testado.** O "miolo" do app já existe, mesmo
+  sem tela: o que é uma `Tarefa`, quais são as quatro colunas, as três
+  prioridades e o que é uma `Sprint`; e as regras de **avançar e voltar** uma
+  coluna por vez, **ordenar por prioridade** (com a mais antiga ganhando o
+  empate), **barrar a quarta tarefa** de uma mesma pessoa em `Fazendo` e
+  **conferir o título** (3 a 80 caracteres). Tudo em Dart puro — sem tela, sem
+  banco, sem internet — o que faz os 36 testes dessa parte rodarem em menos de
+  um segundo.
+- **A cara do Garapuvu, de verdade.** O app abre com a foto do garapuvu florido
+  e a flor de cinco pétalas da marca — a mesma do favicon do site, redesenhada
+  para escalar sem borrar e girar como indicador de carregamento. As cores não
+  são chute: foram lidas do próprio site do projeto (azul-noite, creme e o
+  amarelo da flor).
+- **Duas telas de verdade.** Dá para **cadastrar uma tarefa** (título,
+  responsável, prioridade e estimativa), com cada erro explicando o que fazer em
+  seguida. E há um **relatório de contraste** que calcula, na hora, o quanto cada
+  cor do app se destaca do seu fundo — hoje **13 de 13 pares passam** no critério
+  de acessibilidade AA, nos temas claro e escuro.
+- **As tarefas não somem mais.** O que você cria fica guardado **no próprio
+  aparelho** — feche o app, abra de novo, e a tarefa continua lá. Sem servidor,
+  sem conta, sem nada saindo do celular. E se o arquivo guardado um dia estragar,
+  o app **avisa e continua funcionando** em vez de quebrar: as tarefas que ainda
+  dão para ler são mantidas, e ele diz quantas se perderam.
 - **O ferramental de qualidade.** Um revisor automático de código, um formatador
   e um "porteiro" que roda antes de cada commit: se o código estiver fora do
   padrão, com aviso do revisor ou com teste vermelho, ele **não entra** no
@@ -66,6 +89,14 @@ O que já existe:
   gera os arquivos depois de conferir formatação, análise e testes. Quando falta
   algo no computador (Xcode, SDK do Android, assinatura), o comando diz **o que
   falta e o que fazer**, em português.
+- **Os comandos de emulador.** `make emulador-android` e `make emulador-ios`
+  abrem um celular "de mentira" numa janela do computador e **esperam ele acabar
+  de ligar** antes de devolver o terminal — assim o `make run` seguinte não falha
+  só por pressa. O emulador Android do projeto (`garapuvu_pixel_7`, um Pixel 7
+  com Android 16) já vem escolhido por padrão, e o teclado do computador funciona
+  dentro dele. Se o id pedido não existir, o comando **lista os que existem** em
+  vez de deixar a pessoa esperando.
+
 - **Os primeiros testes.** A tela inicial já é testada em três tamanhos de tela
   (celular pequeno, celular comum e tablet), com fonte ampliada em 200%, com
   verificação de contraste e de espaçamento entre elementos.
@@ -85,7 +116,8 @@ Um passo de cada vez, sempre no mesmo formato:
 
 ## Próximo passo
 
-**Prompt 2 — o núcleo da lógica.** Agora que a teoria está documentada, ela vira
-código: os modelos `Tarefa`, `Status`, `Prioridade` e `Sprint`, mais as regras de
-avançar/voltar coluna, ordenar por prioridade e barrar o quarto card em
-`Fazendo` — tudo em Dart puro, sem tela, com testes desde a primeira linha.
+**Prompt 5 — a lista de tarefas.** Hoje a tela diz *quantas* tarefas estão
+guardadas, mas não mostra **quais**. O próximo passo monta a lista, já na ordem
+certa: as urgentes primeiro e, no empate, a mais antiga na frente. Com o estado
+vazio explicando o que fazer, para quem abre o app pela primeira vez não ficar
+olhando para o nada.

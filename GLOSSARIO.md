@@ -114,6 +114,89 @@
 - **`Row` / `Column` / `Wrap` / `GridView`** — os jeitos de empilhar widgets em
   linha, em coluna, quebrando linha ou em grade — o equivalente ao Flexbox e ao
   Grid do CSS.
+- **Dart puro** — código que **não importa Flutter**. Roda sem tela e sem
+  aparelho, então o teste dele é instantâneo. É onde vivem as regras do quadro.
+- **Função pura** — função que, para a mesma entrada, sempre devolve a mesma
+  saída, e **não muda nada fora dela**. Fácil de testar e de confiar.
+- **`enum`** — lista fechada de opções com nome. `Status` e `Prioridade` são
+  enums: não existe uma quinta coluna nem uma quarta prioridade por acidente.
+- **Classe imutável** — objeto cujos campos nunca mudam depois de criado. Para
+  "alterar", cria-se uma cópia. Evita que um canto do app mude o dado de outro
+  sem querer.
+- **`copyWith`** — o método que faz essa cópia trocando só os campos pedidos.
+- **`final`** — marca um campo ou variável que recebe valor uma vez e nunca mais
+  muda.
+- **Tipo anulável (`Status?`)** — tipo que aceita `null`. Aqui o `null` tem
+  significado de negócio: *"não dá para avançar, esta é a última coluna"*.
+- **Igualdade de valor (`==` e `hashCode`)** — fazer dois objetos com os mesmos
+  dados serem considerados iguais, em vez de comparados por endereço na memória.
+- **Caso de borda** — a entrada no limite da regra, onde o erro costuma se
+  esconder: a primeira e a última coluna, o título com exatamente 80
+  caracteres, a terceira tarefa em `Fazendo`.
+- **Design token** — uma decisão de visual guardada como **constante com nome**
+  (`AppCores.flor`, `AppEspacos.md`) em vez de escrita solta no meio da tela.
+  Trocar o token muda o app inteiro de uma vez.
+- **`ColorScheme`** — o conjunto de papéis de cor do Material 3 (`primary`,
+  `surface`, `error`…). Cada papel tem o seu par `onX`, que é a cor do texto que
+  vai **em cima** dele.
+- **Cor semente (*seed color*)** — a cor a partir da qual o Material 3 gera a
+  paleta inteira, harmonizada.
+- **CSS custom property (`--gp-bloom`)** — como um site guarda seus design
+  tokens. Foi de lá que as cores do Garapuvu vieram, em vez de serem chutadas.
+- **Razão de contraste** — o quanto um texto se destaca do fundo, de 1:1 (some)
+  a 21:1 (preto no branco). O critério AA pede **4,5:1** para texto normal e
+  **3:1** para texto grande, ícone e borda.
+- **Luminância relativa** — o "quanto de luz" uma cor tem, de 0 a 1. Não é a
+  média dos canais: o verde pesa dez vezes mais que o azul, porque o olho humano
+  enxerga assim.
+- **Ícone adaptativo (Android)** — ícone em duas camadas (fundo e frente) que o
+  sistema recorta no formato que quiser: círculo, quadrado arredondado, gota.
+  Por isso o desenho precisa de margem — o que fica na borda **some**.
+- **Densidade de tela (mdpi, hdpi, xhdpi…)** — quantos pixels reais cabem em
+  1 dp. É por isso que o mesmo ícone precisa existir em vários tamanhos.
+- **Camada `monochrome`** — a versão de uma cor só do ícone, usada quando a
+  pessoa liga "ícones temáticos" no Android 13+.
+- **Canal alfa** — a informação de transparência de uma imagem. O ícone do iOS
+  não pode ter: ele precisa ser um quadrado cheio.
+- **Superamostragem (*supersampling*)** — desenhar ampliado e reduzir no fim.
+  É o que deixa a borda lisa em vez de serrilhada.
+- **Splash screen (tela de abertura)** — a primeira tela, que mostra a marca
+  enquanto o app termina de abrir.
+- **`CustomPaint`** — desenhar formas diretamente na tela (a flor do garapuvu é
+  feita assim, sem imagem: ela escala sem borrar e pode girar).
+- **`AnimationController`** — o "motor" de uma animação: conta de 0 a 1 no tempo
+  que você definir, e o desenho acompanha.
+- **Reduzir movimento** — ajuste do sistema para quem passa mal com animação. O
+  app respeita: com ele ligado, a flor do carregamento para de girar.
+- **Serializar / desserializar** — transformar um objeto em texto para guardar
+  (e o contrário, para ler de volta).
+- **ISO 8601** — o jeito internacional de escrever data e hora
+  (`2026-08-26T09:00:00.000`). Ordena igual à data e não depende do idioma do
+  aparelho — `26/08/2026` num celular em inglês seria lido como 8 de fevereiro.
+- **Repositório** — a camada que sabe **onde** os dados ficam. As telas nunca
+  falam com o disco: falam com ela.
+- **Cofre do aparelho (`shared_preferences`)** — o espacinho onde o app guarda
+  coisas pequenas no próprio celular. Nada sai dali.
+- **Chave versionada (`...v1`)** — o nome sob o qual os dados são gravados, com
+  número no fim. Se o formato mudar um dia, a versão nova lê a antiga e converte
+  em vez de atropelar quem não atualizou.
+- **Dado corrompido** — informação gravada que não dá mais para ler (arquivo
+  truncado, editado na mão). O app precisa **avisar**, nunca quebrar.
+- **`ChangeNotifier`** — objeto que guarda dados e **avisa** quem escuta quando
+  eles mudam.
+- **Provider** — quem entrega esse objeto às telas que precisam dele, sem passar
+  de mão em mão pela árvore inteira.
+- **Criação preguiçosa (*lazy*)** — quando algo só é criado no momento em que
+  alguém pede. Útil para economizar, mas aqui atrapalhava: o quadro só começaria
+  a ser lido quando alguma tela pedisse.
+- **Mock** — uma peça de mentirinha que substitui a de verdade no teste. Aqui, um
+  cofre do aparelho **em memória**: o teste roda em milissegundos e não deixa
+  sujeira entre um caso e outro.
+- **`validator`** — a função que um campo de formulário chama para saber se o
+  que foi digitado presta; devolve a mensagem de erro ou `null`.
+- **`Timer` cancelável** — contador de tempo guardado numa variável para poder
+  ser desligado quando a tela morre. Sem isso ele dispara em uma tela que já
+  não existe.
 - **`Semantics`** — a etiqueta invisível que descreve um elemento para o leitor
   de tela de quem não enxerga.
 - **`textScaler`** — o quanto a pessoa aumentou a fonte no sistema; o app precisa
@@ -170,6 +253,30 @@
   `Carla Mutirão`) usados em código, teste e print, para nunca expor pessoas
   reais do Garapuvu.
 
+## Dos emuladores (o celular de mentira)
+
+- **Emulador** — celular Android "de mentira" que roda numa janela do
+  computador; serve para ver o app sem precisar de aparelho físico.
+- **Simulador** — o mesmo, do lado do iPhone. A Apple chama de *simulador*
+  porque ele reaproveita o próprio macOS em vez de imitar o hardware do celular
+  — por isso abre bem mais rápido que o emulador do Android.
+- **AVD (*Android Virtual Device*)** — a "receita" de um emulador salva no seu
+  computador: qual aparelho imitar, qual versão do Android e quanta memória. O
+  deste projeto se chama `garapuvu_pixel_7`.
+- **Imagem do sistema (*system image*)** — o Android em si, baixado uma vez e
+  reaproveitado por todos os AVDs; a nossa é a `android-36` com Google Play.
+- **Cold boot** — a primeira vez que um emulador liga: ele precisa iniciar o
+  Android do zero e pode levar alguns minutos. Nas vezes seguintes é rápido,
+  porque ele volta de onde parou.
+- **`make emulador-android` / `make emulador-ios`** — abrem o celular de mentira
+  e **esperam** ele terminar de ligar, para o `make run` seguinte não falhar por
+  pressa. Escolher outro aparelho: `make emulador-ios EMULADOR="iPhone 16"`.
+- **`flutter devices`** — lista os aparelhos que o Flutter está vendo agora
+  (emulador, simulador, navegador, o próprio Mac); é o que os comandos acima
+  ficam consultando enquanto esperam.
+- **`simctl`** — programa de linha de comando da Apple que liga e desliga
+  simuladores (`xcrun simctl list devices available` mostra os disponíveis).
+
 ## Do build e da publicação
 
 - **Build (ou "buildar")** — transformar o código em um arquivo pronto para
@@ -200,9 +307,8 @@
   `flutter build apk`.
 - **Xcode** — o programa da Apple que compila e assina apps de iPhone; só existe
   no macOS.
-- **Simulador / emulador** — celular "de mentira" que roda no computador, para
-  testar o app sem aparelho físico.
 - **Hospedagem estática** — serviço que publica uma pasta de site pronta (o
   `build/web/`) sem precisar de servidor programado.
 - **Artefato de build** — cada arquivo gerado pelo build (`.apk`, `.aab`,
   `.ipa`, pasta `build/web/`); `make artefatos` mostra quais já existem.
+

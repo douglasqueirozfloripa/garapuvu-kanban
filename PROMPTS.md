@@ -92,6 +92,41 @@ Só `make build-local PLATAFORMA=android` prova que o Android funciona.
 
 ---
 
+## Prompt 0.8 — abrir os emuladores pelo Makefile ✅ executado
+
+```
+Prepare 2 comandos no make file para abrir o emular com ios e o outro para
+abrir o emulador com android
++ pode instalar os emuladores no meu macos
+```
+
+**Resultado:** o `Makefile` ganhou `make emulador-android` e `make emulador-ios`.
+Os dois **esperam o celular acabar de ligar** (consultando `flutter devices` a
+cada 3 segundos, até `ESPERA=180`) antes de liberar o terminal — sem isso, o
+`make run` na sequência falha só por pressa. Dá para escolher o aparelho:
+`make emulador-android EMULADOR=Resizable_Experimental` ou
+`make emulador-ios EMULADOR="iPhone 16"`.
+
+**Sobre "instalar os emuladores":** não faltava nada para baixar. A máquina já
+tinha Xcode 16.2 com iOS 18.3 (11 iPhones/iPads de simulador) e o SDK do Android
+com a imagem `android-36`. O que faltava era um emulador Android **do projeto** —
+só existia o genérico `Resizable_Experimental`. Criado o AVD
+**`garapuvu_pixel_7`** (Pixel 7, Android 36 com Google Play, teclado do
+computador ligado, para digitar título de tarefa sem catar letra na tela).
+Sem `EMULADOR=`, os comandos preferem esse AVD.
+
+**Lição registrada:** `flutter emulators --launch <id-que-nao-existe>` avisa que
+não achou o emulador mas **termina com sucesso** (código 0). A primeira versão do
+comando confiava nesse código e deixava a pessoa esperando 90 segundos por um
+celular que nunca vinha — um beco sem saída. Agora o id é **conferido antes** de
+tentar abrir, e o erro já lista os ids válidos.
+
+Nenhum código Dart foi tocado: **89 testes** continuam verdes.
+
+**Próximo passo:** a decidir entre os três propostos no fim da resposta.
+
+---
+
 ## Prompt 1 — Fundamentação: de onde vem Scrum e Kanban ✅ executado
 
 ```
@@ -161,6 +196,252 @@ liberar: `dart format` (6 arquivos, 0 alterações) → `flutter analyze` (*No i
 found!*) → `flutter test` (**9 de 9**).
 
 **Próximo passo:** Prompt 2 — o núcleo da lógica em Dart puro, com testes.
+
+---
+
+## Prompt 2 — Núcleo da lógica em Dart puro + testes ✅ executado
+
+```
+Rode o Prompt 2: o núcleo da lógica. Em Dart puro (sem importar Flutter), crie os
+modelos imutáveis Tarefa, Status, Prioridade e Sprint em lib/src/features/board/model/,
+e as funções puras do quadro em lib/src/features/board/model/regras_quadro.dart:
+avancarStatus, voltarStatus, ordenarPorPrioridade, podeEntrarEmFazendo (limite de
+WIP de 3 por pessoa) e validarTitulo (3 a 80 caracteres). Escreva os testes
+unitários em test/unit/ cobrindo os casos de borda: primeira e última coluna,
+empate de prioridade, WIP no limite e estourado, título vazio/curto/longo.
+```
+
+**Resultado:** 5 arquivos em `model/` (461 linhas) + 2 de teste, **nenhum deles
+importando Flutter**. Placar: **45 testes verdes** (25 de regras + 11 de
+modelos + 9 de tela que já existiam).
+
+Decisões de projeto que valem registro:
+
+| Decisão | Por quê |
+| --- | --- |
+| `avancarStatus` devolve `Status?`, e `null` na última coluna | Obriga a tela a decidir o que fazer no fim do quadro em vez de devolver a mesma coluna e fingir que algo aconteceu (regra 6.6) |
+| `validarTitulo` devolve a **mensagem de erro**, não `true`/`false` | O erro precisa dizer o que houve e qual o próximo passo — e encaixa direto no `validator` de um formulário |
+| `ordenarPorPrioridade` copia a lista antes de ordenar | `List.sort` altera o original; um canto do app mudaria a ordem de outro sem querer |
+| Nome do responsável é normalizado (sem espaço extra, sem caixa) | Sem isso `'Ana'` e `'ana '` contariam como duas pessoas e o limite de WIP deixaria passar **o dobro** de tarefas |
+| `motivoDoLimiteDeWip` mora junto da checagem | Regra 5.3 exige avisar **e explicar**; a prática 4 do Kanban exige política explícita. Espalhar a mensagem pelas telas convidaria a versões diferentes dela |
+
+A ordem de declaração dos `enum` **é** a regra de negócio: `Status` declara as
+colunas na ordem do quadro e `Prioridade`, da mais para a menos urgente. Um teste
+trava isso, para ninguém reordenar sem perceber a consequência.
+
+**Sobre a regra 6.1 (testes dos dois lados):** este prompt é explicitamente "sem
+UI", então só existe o lado da lógica. O lado da tela nasce junto da tela, no
+Prompt 3.
+
+**Próximo passo:** Prompt 3 — primeira tela + design tokens + contraste.
+
+---
+
+## Prompt 3 — Primeira tela + design tokens + contraste ✅ executado
+
+```
+Rode o Prompt 3: a primeira tela. [...] Adicione o painel de contraste ao vivo
+que calcula a razão de cada par de cores do tema e mostra PASSA/FALHA AA. [...]
+
++ (no meio do passo) https://projeto-garapuvu.web.app/
+  Quero esse design token de cores, primarias, secundarias, etcc..
++ aproveite pegue o five icon e a imagem de background e faça um splashscreen
+  do app na tela de inicio, e um mini loading do simbolizando o favi icon da
+  flor do garapuvu
+```
+
+**Resultado:** placar **100 testes verdes**. Entregue: `app_cores.dart`,
+`pares_de_contraste.dart`, `contraste.dart` (WCAG em Dart puro),
+`flor_garapuvu.dart`, `indicador_flor.dart`, `tela_splash.dart`,
+`tela_cadastro_tarefa.dart`, `tela_contraste.dart`, `seletor_prioridade.dart`,
+`validacoes.dart` e 4 arquivos de teste. Prints em `docs/screenshots/`.
+
+### A paleta parou de ser palpite
+
+O pedido do site mudou o passo no meio: a §8 do arquivo de instruções dizia
+"verde de mata com acento de madeira" — **chute feito antes de alguém olhar o
+site**. O site expõe seus design tokens em CSS (`--gp-*`), e a identidade real é
+**azul-noite + creme + o amarelo da flor do garapuvu**. A §8 foi corrigida com a
+tabela de equivalência e o registro do erro.
+
+### Três defeitos que só apareceram porque olhamos
+
+| Como apareceu | O defeito | A correção |
+| --- | --- | --- |
+| **Screenshot** | As mensagens de erro vinham **cortadas** em "…" — um erro truncado não consegue dizer o próximo passo (regra 6.6). O `find.textContaining` passava, porque olha o widget e não o que a pessoa lê | `errorMaxLines: 4` no tema + o teste `textoFoiCortado`, que lê o `RenderParagraph` já desenhado. Provado: vermelho sem a correção, verde com ela |
+| **Diretriz do `flutter_test`** | O botão de contorno usava o amarelo como **cor de texto** sobre o creme: **1,70:1**, ilegível | Âmbar escuro (`--gp-bloom-deep`) no claro, amarelo no escuro — e o par entrou no relatório, que não o conferia por não estar na lista |
+| **Teste do splash** | `Future.delayed` cria um timer **impossível de cancelar**, que dispara em uma tela já morta | `Timer` guardado em campo e cancelado no `dispose` |
+
+O segundo é o mais instrutivo: **o painel de contraste não pegou**. Ele só
+confere os pares listados em `pares_de_contraste.dart`, e esse par não estava
+lá. Painel e diretriz automática se cobrem — nenhum dos dois basta sozinho.
+
+### Outras decisões
+
+- A flor do favicon foi **redesenhada com `CustomPaint`** em vez de carregada
+  como SVG: sem dependência nova, escala sem borrar e pode girar.
+- O indicador de carregamento **para de girar** quando o sistema está com
+  "reduzir movimento" ligado, e sempre anuncia a espera em texto.
+- `pumpAndSettle` **trava** com animação que se repete. O suporte de teste ganhou
+  `aguardarEstabilizar: false` para essas telas.
+- O contador `0/80` dividia a linha com a mensagem de erro e a cortava ao meio na
+  leitura ("...o que **0/80** precisa ser feito"). Escondido: o `maxLength` já
+  impede passar de 80.
+- O véu sobre a foto do splash é quase sólido na altura do texto: texto claro
+  precisa de fundo escuro **garantido**, não de sorte com a foto.
+
+**Contraste final: 13 de 13 pares em AA**, nos temas claro e escuro. O botão
+principal (amarelo-flor sobre azul-noite) dá **9,08:1**.
+
+**Próximo passo:** Prompt 4 — persistência com `shared_preferences`.
+
+---
+
+## Prompt 3.5 — rodar nos emuladores + `make rodar` / `make parar` ✅ executado
+
+```
+Antes de fazer o Prompt 4 (opção 2), preciso que vc execute o app para que o
+emulador do android e ios que estao abertos, iniciarem o app
++ deixe um comando para eu encerrar via terminal a execucao do app nos 2
+  emuladores, e ql comando para rodar novamente
+```
+
+**Resultado:** o app rodou nos dois emuladores (Android 16 / API 36 e iPhone 16
+Pro / iOS 18.3), com prints tirados **de dentro** deles (`adb exec-out screencap`
+e `xcrun simctl io screenshot`) — não da web. O `Wrap` se provou fora do teste:
+no Android os dois botões couberam numa linha e no iPhone quebraram para duas,
+sem estourar layout em nenhum.
+
+Dois alvos novos no `Makefile`:
+
+| Comando | O que faz |
+| --- | --- |
+| `make rodar` | Liga o app nos **dois** emuladores de uma vez, em segundo plano, com log em `build/logs/` |
+| `make parar` | Fecha o app nos dois e encerra as sessões de execução; os emuladores continuam abertos |
+| `make run APARELHO=android\|ios\|web\|mac` | Um aparelho por vez, em primeiro plano, **com hot reload** |
+
+Decisões que valem registro:
+
+- **`make run` puro pedia escolha.** Com 5 dispositivos conectados, `flutter run`
+  abre um menu — o que trava execução automática. Daí o `APARELHO=`.
+- **O `parar` não usa `pkill` genérico.** Um `pkill -f 'flutter run'` derrubaria
+  sessões de **outros projetos** Flutter abertos na máquina. Ele fecha o app em
+  cada emulador (o que já faz o `flutter run` daquele aparelho sair sozinho) e só
+  então limpa sessões presas, filtrando pelo **id do aparelho**.
+- **Os identificadores do app são diferentes** nas duas plataformas —
+  `br.org.garapuvu.garapuvu_kanban` no Android e
+  `br.org.garapuvu.garapuvuKanban` no iOS. Foi assim que o `flutter create`
+  gerou; o Makefile guarda os dois em `ID_ANDROID` e `ID_IOS`.
+- **O `adb` não está no PATH.** O Makefile o procura em `$ANDROID_HOME` e no
+  caminho padrão do macOS antes de desistir.
+- Rodar `make parar` com nada rodando **não é erro**: ele avisa e aponta o
+  próximo comando (regra 6.6, nenhum beco sem saída).
+
+### Achado: o app ainda se apresenta como "app Flutter"
+
+Ao reiniciar no emulador Android, a primeira coisa na tela é **o logo do
+Flutter** — o ícone do app ainda é o padrão do `flutter create`, e o Android 12+
+usa o ícone na abertura nativa, antes de o nosso splash existir. No iOS o
+`LaunchImage.png` também é o padrão. Não é regressão (nunca foi configurado),
+mas contrasta com a marca aplicada no Prompt 3. O SVG da flor já está em
+`assets/images/favicon-garapuvu.svg`.
+
+Placar: **100 testes verdes** (nenhum código Dart foi alterado neste passo).
+
+**Próximo passo:** Prompt 4 — persistência com `shared_preferences`.
+
+---
+
+## Prompt 3.6 — o ícone do app vira a flor do Garapuvu ✅ executado
+
+```
+2 e 4 nessa ordem   (opção 2 = trocar o ícone do app)
+```
+
+**Resultado:** o app deixou de se apresentar como "app Flutter". O achado do
+Prompt 3.5 — o logo do Flutter aparecendo na abertura nativa do Android — está
+resolvido: eram os ícones padrão que o `flutter create` gerou, em Android e iOS.
+
+Novo script `scripts/gerar_icones.py` + alvo **`make icones`**. Ele **desenha** a
+flor por código, com a mesma geometria do `favicon-garapuvu.svg` (cinco pétalas
+giradas de 72°, miolo âmbar), e produz os ~25 tamanhos de uma vez.
+
+| Decisão | Por quê |
+| --- | --- |
+| Desenhar por código, com Pillow | Refazer 25 tamanhos à mão a cada ajuste da marca seria trabalhoso e sujeito a erro. Mudou a cor em `app_cores.dart`? `make icones` e pronto |
+| **Não** usar `flutter_launcher_icons` | Resolveria o mesmo problema, mas acrescentaria dependência e esconderia a conta. Aqui dá para ler o desenho — o projeto é didático |
+| Ícone **adaptativo** no Android, não só o clássico | É o que o Android 8+ usa, e é dele que sai a tela de abertura do Android 12+ — exatamente onde o logo do Flutter aparecia |
+| Flor a 55% no adaptativo (contra 92% no clássico) | A arte adaptativa tem 108 dp e o sistema mostra só os 72 dp do meio. A 92% as pétalas seriam **cortadas** |
+| Camada `monochrome` | É o que o Android 13+ usa quando a pessoa liga ícones temáticos |
+| iOS gravado sem canal alfa | O iOS **recusa** ícone com transparência e arredonda o canto sozinho — por isso o quadrado vai cheio, sem o arredondamento nosso |
+
+O desenho gerado foi conferido contra o SVG oficial renderizado (`qlmanage`),
+lado a lado: mesma forma, mesmas proporções. O gerador é **determinístico** —
+rodar duas vezes produz arquivos byte a byte idênticos (conferido por `shasum`).
+
+### De quebra: o nome do app
+
+O ícone novo deixou visível outro resquício do `flutter create`: o Android
+rotulava o app como **`garapuvu_kanban`** — snake_case, com sublinhado, na cara
+de quem usa. Corrigido para `Garapuvu Kanban` no `AndroidManifest.xml`.
+
+No iOS o `Info.plist` já trazia `CFBundleDisplayName = "Garapuvu Kanban"`, e o
+registro do simulador (`xcrun simctl listapps`) confirma esse valor — mas a tela
+de início desenhava `GarapuvuKanban`, sem espaço, mesmo após desinstalar e
+reinstalar. É cache de rótulo do SpringBoard, não configuração do projeto: o
+dado autoritativo está certo. Reiniciar o SpringBoard limpa, mas move o app para
+outra página da tela de início.
+
+**Próximo passo:** Prompt 4 — persistência com `shared_preferences`.
+
+---
+
+## Prompt 4 — Persistência com `shared_preferences` ✅ executado
+
+```
+Rode o Prompt 4: a persistência. Crie em lib/src/data/ um repositório que serializa
+a lista de tarefas para JSON e grava no shared_preferences, com toJson/fromJson nos
+modelos e tratamento de dado corrompido (se o JSON não for válido, começar vazio e
+avisar, nunca crashar). Ligue o QuadroController (ChangeNotifier) ao repositório.
+Teste com um shared_preferences em memória (mock), cobrindo salvar, carregar, dado
+ausente e dado corrompido.
+```
+
+**Resultado:** as tarefas sobrevivem ao fechar o app. Placar: **156 testes
+verdes** (56 novos). Provado no emulador Android: tarefa criada → processo do
+app **morto** (PID 8929) → app reaberto (PID 9245) → a tarefa continua lá, lida
+do disco e não da memória.
+
+### Decisões de projeto
+
+| Decisão | Por quê |
+| --- | --- |
+| Enums gravados por **nome** (`'fazendo'`), não por posição | A ordem de declaração **é** a regra de negócio e pode mudar. Com posição, mover `fazendo` na declaração faria toda tarefa gravada **mudar de coluna sozinha**. Tem teste travando isso |
+| Datas em **ISO 8601** | Ordena igual à data que representa e não depende do idioma do aparelho — `26/08/2026` num celular em inglês vira 8 de fevereiro |
+| Uma tarefa estragada **não** derruba as boas | Descartar 20 tarefas por causa de 1 quebrada seria pior que o próprio defeito. O aviso diz **quantas** se perderam |
+| `status`/`prioridade` desconhecidos caem no padrão | Perder a tarefa inteira por causa de uma coluna com nome estranho seria pior que vê-la reaparecer em "A fazer" |
+| Aviso viaja no **resultado**, não em `print` | Quem precisa saber é a **pessoa**, na tela — e a regra 6.6 exige que o erro diga o próximo passo |
+| Chave versionada (`garapuvu.quadro.v1`) | Se o formato mudar, a versão nova lê a antiga e converte, sem atropelar quem não atualizou |
+| O quadro inteiro em **um** JSON, não uma chave por tarefa | Salvar vira uma operação só: sem risco de meia gravação deixar o quadro pela metade |
+| Voltar de `Fazendo` **nunca** é barrado pelo WIP | Tirar trabalho de cima de alguém não pode ser bloqueado. Mas voltar **para** `Fazendo` respeita o limite, senão ele teria porta dos fundos |
+
+### Um defeito que o teste pegou
+
+O `ChangeNotifierProvider` é **preguiçoso por padrão**: só cria o objeto quando
+alguém o lê. Como nenhuma tela lia o quadro ainda, o `carregar()` **nunca
+começava** — jogando fora a ideia de ler o aparelho em paralelo com a tela de
+abertura. O teste `ao abrir, o app JA carrega o que estava guardado` falhou e
+expôs isso; a correção é `lazy: false`.
+
+### Coerência da interface
+
+A tela inicial dizia, na cara da pessoa, que a tarefa "ainda nao e guardada:
+isso entra no Prompt 4". Isso virou mentira — o cadastro agora grava de verdade,
+e a tela ganhou uma linha dizendo **quantas tarefas estão guardadas** (a lista
+completa é o Prompt 5) e um cartão de aviso com botão "Entendi" para os recados
+do quadro.
+
+**Próximo passo:** Prompt 5 — a lista ordenada por prioridade, com estado vazio.
 
 ---
 
@@ -470,11 +751,14 @@ implemente ainda — só o plano, para eu escolher os 3 primeiros.
 - [x] **Prompt 0.5** — comandos de build no `Makefile`.
 - [x] **Prompt 0.6** — pré-requisitos, app rodando e toolchain Android fechada.
 - [x] **Prompt 0.7** — commit inicial (`e86248d`).
+- [x] **Prompt 0.8** — `make emulador-android` / `make emulador-ios` + AVD `garapuvu_pixel_7`.
 - [x] **Prompt 1** — fundamentação (Scrum/Kanban com fontes).
-- [ ] **Prompt 2** — núcleo da lógica em Dart puro + testes.
+- [x] **Prompt 2** — núcleo da lógica em Dart puro + testes.
 - [x] **Prompt 2.5** — ferramental de qualidade *(entregue no Prompt 0; revisar quando existir código)*.
-- [ ] **Prompt 3** — primeira tela + design tokens + contraste.
-- [ ] **Prompt 4** — persistência (`shared_preferences`).
+- [x] **Prompt 3** — primeira tela + design tokens + contraste (+ splash e marca real).
+- [x] **Prompt 3.5** — app rodando nos emuladores + `make rodar` / `make parar`.
+- [x] **Prompt 3.6** — ícone do app (Android e iOS) com a flor do Garapuvu.
+- [x] **Prompt 4** — persistência (`shared_preferences`).
 - [ ] **Prompt 5** — lista por prioridade.
 - [ ] **Prompt 6** — quadro Kanban (avança/volta).
 - [ ] **Prompt 7** — dashboard.

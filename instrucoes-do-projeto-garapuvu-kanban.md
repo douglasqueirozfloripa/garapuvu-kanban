@@ -406,11 +406,40 @@ placar vêm juntos**, na mesma resposta.
 
 ### Inspiração visual e design tokens
 
-**Inspiração:** **Material Design 3** com paleta derivada da identidade do
-**Garapuvu** — o garapuvu é uma árvore da Mata Atlântica, então a base é o verde de
-mata com um acento de terra/madeira. Os tokens ficam em `lib/src/core/theme/` como
-constantes nomeadas (nada de cor solta no meio do widget), e cada par
-fundo/texto entra no relatório de contraste da §6.3.
+**Inspiração:** **Material Design 3** com a paleta **real** do
+[site oficial do Garapuvu](https://projeto-garapuvu.web.app/), lida das CSS
+custom properties (`--gp-*`) que o próprio site declara.
+
+> **Correção registrada (Prompt 3):** até aqui esta seção dizia que a base era
+> "verde de mata com acento de madeira". Era **palpite**, feito antes de alguém
+> olhar o site. A identidade de verdade é outra: **azul-noite + creme + o
+> amarelo da flor do garapuvu** — a árvore floresce amarelo, e é esse amarelo
+> que o site usa no botão principal, sobre fundo azul-noite. Verde-folha e
+> marrom-galho existem, mas são apoio.
+
+| Token do site | Cor | Papel no app |
+| --- | --- | --- |
+| `--gp-bloom` | `#F2B705` amarelo-flor | `primary` — a cor de ação |
+| `--gp-band` / `--gp-text` | `#0E1F38` azul-noite | barra do topo, texto, `onPrimary` |
+| `--gp-page` | `#FBF7EE` creme | fundo das telas claras |
+| `--gp-leaf` | `#3E6B4F` verde-folha | `secondary` |
+| `--gp-branch` | `#5B4636` marrom-galho | `tertiary` |
+| `--gp-bloom-deep` | `#A85F00` âmbar escuro | texto de botão sobre fundo claro |
+
+**Armadilha aprendida:** o amarelo-flor só funciona como **fundo** (com texto
+azul-noite, 9,08:1). Como **cor de texto** sobre o creme ele dá **1,70:1** —
+ilegível. É para isso que o site oferece o âmbar escuro. A diretriz de contraste
+do `flutter_test` pegou esse erro; o painel de contraste **não**, porque o par
+não estava na lista dele. Lição: o painel só confere o que está listado em
+`pares_de_contraste.dart` — os dois testes são necessários.
+
+A marca também entra como **imagem**: o `favicon.svg` do site (a flor de cinco
+pétalas) foi redesenhado em Flutter com `CustomPaint` (`flor_garapuvu.dart`), e a
+foto do garapuvu florido abre o app na tela de splash.
+
+Os tokens ficam em `lib/src/core/theme/app_cores.dart` como constantes nomeadas
+(nada de cor solta no meio do widget), e cada par fundo/texto entra no relatório
+de contraste da §6.3.
 
 ---
 

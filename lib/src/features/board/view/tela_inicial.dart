@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/tela_contraste.dart';
+import '../model/tarefa.dart';
+import '../state/quadro_controller.dart';
+import '../widgets/quantas_guardadas.dart';
+import 'tela_cadastro_tarefa.dart';
 
 /// Tela inicial provisoria do Garapuvu Kanban.
 ///
@@ -83,6 +89,10 @@ class TelaInicial extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppEspacos.lg),
+                  const QuantasGuardadas(),
+                  const SizedBox(height: AppEspacos.lg),
+                  const _Acoes(),
+                  const SizedBox(height: AppEspacos.lg),
                   _CartaoProximoPasso(tema: tema),
                   const SizedBox(height: AppEspacos.lg),
                   Text(
@@ -118,15 +128,15 @@ class _CartaoProximoPasso extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Passo atual: Prompt 0 concluido',
+              'Passo atual: Prompt 4 concluido',
               style: tema.textTheme.titleMedium,
             ),
             const SizedBox(height: AppEspacos.sm),
             Text(
-              'A documentacao, a estrutura de pastas e o ferramental de '
-              'qualidade estao prontos. O proximo passo do roteiro e o '
-              'Prompt 1: fundamentar Scrum e Kanban com fontes reais, antes de '
-              'escrever a logica do quadro.',
+              'As tarefas agora ficam guardadas no aparelho: elas continuam '
+              'aqui quando o app fecha e abre de novo. O proximo passo do '
+              'roteiro e o Prompt 5: mostrar a lista de tarefas em ordem de '
+              'prioridade.',
               style: tema.textTheme.bodyMedium,
             ),
             const SizedBox(height: AppEspacos.sm),
@@ -137,6 +147,76 @@ class _CartaoProximoPasso extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Os botoes que levam as telas que ja existem.
+///
+/// Usa [Wrap] para que em 320 dp os botoes desçam de linha em vez de estourar,
+/// e cada um tem altura minima de alvo de toque.
+class _Acoes extends StatelessWidget {
+  const _Acoes();
+
+  /// Abre o cadastro e, se uma tarefa voltar, confirma na tela.
+  ///
+  /// O `ScaffoldMessenger` e capturado ANTES do `await`: depois dele o
+  /// `context` pode nao valer mais, e usa-lo seria um bug silencioso.
+  static Future<void> _abrirCadastro(BuildContext context) async {
+    final ScaffoldMessengerState mensageiro = ScaffoldMessenger.of(context);
+    final NavigatorState navegador = Navigator.of(context);
+    final QuadroController quadro = context.read<QuadroController>();
+
+    final Tarefa? criada = await navegador.push<Tarefa>(
+      MaterialPageRoute<Tarefa>(
+        builder: (BuildContext _) => const TelaCadastroTarefa(),
+      ),
+    );
+
+    if (criada == null) {
+      return;
+    }
+
+    // A partir do Prompt 4 a tarefa e realmente gravada no aparelho.
+    await quadro.adicionar(criada);
+
+    mensageiro.showSnackBar(
+      SnackBar(
+        content: Text(
+          'Tarefa "${criada.titulo}" guardada neste aparelho para '
+          '${criada.responsavel}.',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppEspacos.sm,
+      runSpacing: AppEspacos.sm,
+      children: <Widget>[
+        SizedBox(
+          height: AppEspacos.alvoDeToque,
+          child: FilledButton.icon(
+            onPressed: () => _abrirCadastro(context),
+            icon: const Icon(Icons.add),
+            label: const Text(TelaCadastroTarefa.titulo),
+          ),
+        ),
+        SizedBox(
+          height: AppEspacos.alvoDeToque,
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext _) => const TelaContraste(),
+              ),
+            ),
+            icon: const Icon(Icons.contrast),
+            label: const Text(TelaContraste.titulo),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,41 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:garapuvu_kanban/src/features/board/model/prioridade.dart';
+import 'package:garapuvu_kanban/src/features/board/model/tarefa.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:garapuvu_kanban/app.dart';
+import 'package:garapuvu_kanban/src/data/repositorio_de_tarefas.dart';
+import 'package:garapuvu_kanban/src/features/board/state/quadro_controller.dart';
 import 'package:garapuvu_kanban/src/features/board/view/tela_inicial.dart';
 
-/// Tamanhos de tela em que TODA tela deste projeto precisa funcionar.
-///
-/// Regra do arquivo de instrucoes (secao "Qualidade visual: layout sem
-/// quebra"): telefone pequeno, telefone comum e tablet.
-const Map<String, Size> tamanhosDeTela = <String, Size>{
-  'telefone pequeno (320 dp)': Size(320, 640),
-  'telefone comum (390 dp)': Size(390, 844),
-  'tablet (768 dp)': Size(768, 1024),
-};
-
-Future<void> _montarEm(WidgetTester tester, Size tamanho) async {
-  tester.view.physicalSize = tamanho;
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-
-  await tester.pumpWidget(const GarapuvuKanbanApp());
-  await tester.pumpAndSettle();
-}
+import 'suporte_de_tela.dart';
 
 void main() {
+  // O app cria o QuadroController, que le o aparelho. Sem o cofre em memoria,
+  // esses testes dependeriam do plugin nativo — que nao existe aqui.
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late QuadroController quadro;
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    quadro = QuadroController(
+      repositorio: RepositorioDeTarefas(
+        preferencias: await SharedPreferences.getInstance(),
+      ),
+    );
+  });
+
   group('TelaInicial', () {
+    testWidgets('o app inteiro abre na tela inicial',
+        (WidgetTester tester) async {
+      // Os demais testes montam a tela sozinha, o que e mais rapido. Este
+      // monta o GarapuvuKanbanApp de verdade, para garantir que o tema e a
+      // home continuam ligados como o main espera.
+      await tester.pumpWidget(const GarapuvuKanbanApp());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TelaInicial), findsOneWidget);
+      expect(find.text('Garapuvu Kanban'), findsOneWidget);
+    });
+
     testWidgets('mostra o titulo do app e o passo atual do roteiro',
         (WidgetTester tester) async {
-      await _montarEm(tester, tamanhosDeTela['telefone comum (390 dp)']!);
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
 
       expect(find.text('Garapuvu Kanban'), findsOneWidget);
       expect(find.text('Quadro do time Garapuvu'), findsOneWidget);
-      expect(find.textContaining('Prompt 0 concluido'), findsOneWidget);
+      expect(find.textContaining('Prompt 4 concluido'), findsOneWidget);
     });
 
     testWidgets('lista as quatro colunas na ordem da regra de negocio',
         (WidgetTester tester) async {
-      await _montarEm(tester, tamanhosDeTela['telefone comum (390 dp)']!);
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
 
       expect(
         TelaInicial.colunasDoQuadro,
@@ -54,7 +68,7 @@ void main() {
 
     testWidgets('avisa que os dados ficam no aparelho (LGPD)',
         (WidgetTester tester) async {
-      await _montarEm(tester, tamanhosDeTela['telefone comum (390 dp)']!);
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
 
       expect(find.textContaining('somente neste aparelho'), findsOneWidget);
     });
@@ -64,7 +78,12 @@ void main() {
     for (final MapEntry<String, Size> entrada in tamanhosDeTela.entries) {
       testWidgets('monta sem overflow em ${entrada.key}',
           (WidgetTester tester) async {
-        await _montarEm(tester, entrada.value);
+        await montarTela(
+          tester,
+          const TelaInicial(),
+          tamanho: entrada.value,
+          quadro: quadro,
+        );
 
         expect(tester.takeException(), isNull);
         expect(find.text('Quadro do time Garapuvu'), findsOneWidget);
@@ -73,13 +92,13 @@ void main() {
 
     testWidgets('mantem folga maior que 0,5 dp entre o titulo e o texto',
         (WidgetTester tester) async {
-      await _montarEm(tester, tamanhosDeTela['telefone comum (390 dp)']!);
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
 
-      final Rect titulo = tester.getRect(find.text('Quadro do time Garapuvu'));
-      final Rect paragrafo =
-          tester.getRect(find.textContaining('Um lugar simples'));
-
-      final double folga = paragrafo.top - titulo.bottom;
+      final double folga = folgaVertical(
+        tester,
+        find.text('Quadro do time Garapuvu'),
+        find.textContaining('Um lugar simples'),
+      );
 
       expect(
         folga,
@@ -90,30 +109,74 @@ void main() {
 
     testWidgets('respeita fonte ampliada em 200% sem quebrar',
         (WidgetTester tester) async {
-      tester.view.physicalSize = tamanhosDeTela['telefone comum (390 dp)']!;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        MediaQuery(
-          // fromView preserva o tamanho real da tela de teste; so o textScaler
-          // e trocado. Um MediaQueryData vazio daria Size.zero e
-          // quebraria o layout inteiro.
-          data: MediaQueryData.fromView(tester.view).copyWith(
-            textScaler: const TextScaler.linear(2),
-          ),
-          child: const GarapuvuKanbanApp(),
-        ),
+      await montarTela(
+        tester,
+        const TelaInicial(),
+        escalaDeFonte: 2,
+        quadro: quadro,
       );
-      await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('sem tarefas, explica o que fazer em vez de ficar mudo',
+        (WidgetTester tester) async {
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
+
+      expect(
+        find.textContaining('Nenhuma tarefa guardada ainda'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Nova tarefa'), findsWidgets);
+    });
+
+    testWidgets('com tarefas guardadas, diz quantas e que elas ficam',
+        (WidgetTester tester) async {
+      await quadro.adicionar(
+        Tarefa(
+          id: '1',
+          titulo: 'Levar doacoes ao galpao',
+          responsavel: 'Ana Voluntaria',
+          prioridade: Prioridade.alta,
+          criadaEm: DateTime(2026, 8, 26, 9),
+        ),
+      );
+
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
+
+      expect(find.textContaining('1 tarefa guardada'), findsOneWidget);
+      expect(
+        find.textContaining('continua aqui quando o app fechar'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('o aviso do quadro aparece e da para dispensar',
+        (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'flutter.${RepositorioDeTarefas.chave}': 'lixo {{{',
+      });
+      final QuadroController danificado = QuadroController(
+        repositorio: RepositorioDeTarefas(
+          preferencias: await SharedPreferences.getInstance(),
+        ),
+      );
+      await danificado.carregar();
+
+      await montarTela(tester, const TelaInicial(), quadro: danificado);
+
+      expect(find.textContaining('danificado'), findsOneWidget);
+
+      await tester.tap(find.text('Entendi'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('danificado'), findsNothing);
     });
 
     testWidgets('passa nas diretrizes de acessibilidade do Flutter',
         (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await _montarEm(tester, tamanhosDeTela['telefone comum (390 dp)']!);
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
 
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
