@@ -132,6 +132,38 @@ o time se organiza*. Nenhuma linha de código foi escrita, como o prompt pedia.
 
 ---
 
+## Prompt 0.7 — o primeiro commit ✅ executado
+
+```
+2   (fazer o primeiro commit)
+```
+
+**Resultado:** commit inicial `e86248d` — **100 arquivos, 4.406 linhas**, em
+`main` (o repositório não tinha nenhum commit ainda e não tem remoto, então não
+havia de onde ramificar).
+
+Antes de commitar, o conteúdo foi auditado:
+
+- **Nenhum caminho absoluto da máquina** vazou para o histórico. Os arquivos que
+  contêm esses caminhos (`ios/Flutter/Generated.xcconfig`,
+  `android/local.properties`, `.flutter-plugins-dependencies`) existem no disco
+  mas ficaram **de fora**, barrados pelos `.gitignore` que o próprio Flutter cria
+  dentro de `android/` e `ios/`.
+- **Nenhum artefato de build** entrou: o APK e o AAB de 19 MB estão em `build/`,
+  que o `.gitignore` já ignorava. O maior arquivo do commit tem 56 KB (um print).
+- `pubspec.lock` **entrou** de propósito — em app (diferente de biblioteca), ele
+  trava a versão exata das dependências para todo mundo do time.
+- `.gitignore` ganhou uma linha: `.playwright-mcp/`, pasta temporária criada ao
+  tirar os prints das telas.
+
+O **hook de pre-commit funcionou de verdade**, rodando os três portões antes de
+liberar: `dart format` (6 arquivos, 0 alterações) → `flutter analyze` (*No issues
+found!*) → `flutter test` (**9 de 9**).
+
+**Próximo passo:** Prompt 2 — o núcleo da lógica em Dart puro, com testes.
+
+---
+
 ## Equivalências web → Flutter (por que o roteiro mudou de ferramenta)
 
 O roteiro original do ia-na-pratica é web. Este projeto é Flutter. As **regras**
@@ -437,6 +469,7 @@ implemente ainda — só o plano, para eu escolher os 3 primeiros.
 - [x] **Prompt 0** — setup do arquivo de instruções + este roteiro + scaffold + ferramental.
 - [x] **Prompt 0.5** — comandos de build no `Makefile`.
 - [x] **Prompt 0.6** — pré-requisitos, app rodando e toolchain Android fechada.
+- [x] **Prompt 0.7** — commit inicial (`e86248d`).
 - [x] **Prompt 1** — fundamentação (Scrum/Kanban com fontes).
 - [ ] **Prompt 2** — núcleo da lógica em Dart puro + testes.
 - [x] **Prompt 2.5** — ferramental de qualidade *(entregue no Prompt 0; revisar quando existir código)*.
