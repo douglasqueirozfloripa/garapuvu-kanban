@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../model/status.dart';
 import '../model/tarefa.dart';
 import 'etiqueta_prioridade.dart';
 
@@ -10,14 +11,38 @@ import 'etiqueta_prioridade.dart';
 /// o **responsavel** e em que **coluna** a tarefa esta. Descricao e estimativa
 /// so aparecem quando existem — campo opcional vazio nao vira linha em branco.
 ///
-/// O cartao nao tem botao ainda: mover a tarefa de coluna e o Prompt 6. Por
-/// isso ele e so leitura, e nao finge ser tocavel.
+/// Os botoes de mover so aparecem quando [aoAvancar] e [aoVoltar] sao
+/// informados — na lista (Prompt 5) o cartao e so leitura, e no quadro
+/// (Prompt 6) ele caminha. Um cartao que parecesse tocavel sem fazer nada seria
+/// um beco (regra 6.6).
 class CartaoDeTarefa extends StatelessWidget {
   /// Cria o cartao de [tarefa].
-  const CartaoDeTarefa({required this.tarefa, super.key});
+  const CartaoDeTarefa({
+    required this.tarefa,
+    this.aoAvancar,
+    this.aoVoltar,
+    this.mostrarColuna = true,
+    super.key,
+  });
 
   /// A tarefa mostrada.
   final Tarefa tarefa;
+
+  /// Empurra a tarefa para a proxima coluna. `null` deixa o cartao so leitura.
+  final VoidCallback? aoAvancar;
+
+  /// Puxa a tarefa para a coluna anterior. `null` deixa o cartao so leitura.
+  final VoidCallback? aoVoltar;
+
+  /// Mostra em que coluna a tarefa esta.
+  ///
+  /// O quadro passa `false`: la o cabecalho da coluna ja diz isso, e repetir a
+  /// informacao dentro de cada cartao so gastaria a largura que os titulos
+  /// precisam.
+  final bool mostrarColuna;
+
+  /// `true` quando este cartao carrega os botoes de mover.
+  bool get _temAcoes => aoAvancar != null || aoVoltar != null;
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +86,12 @@ class CartaoDeTarefa extends StatelessWidget {
                   texto: tarefa.responsavel,
                   rotuloParaLeitor: 'Responsavel: ${tarefa.responsavel}',
                 ),
-                _EtiquetaDeTexto(
-                  icone: Icons.view_column_outlined,
-                  texto: tarefa.status.rotulo,
-                  rotuloParaLeitor: 'Coluna: ${tarefa.status.rotulo}',
-                ),
+                if (mostrarColuna)
+                  _EtiquetaDeTexto(
+                    icone: Icons.view_column_outlined,
+                    texto: tarefa.status.rotulo,
+                    rotuloParaLeitor: 'Coluna: ${tarefa.status.rotulo}',
+                  ),
                 if (tarefa.estimativaEmHoras != null)
                   _EtiquetaDeTexto(
                     icone: Icons.schedule,
@@ -75,8 +101,91 @@ class CartaoDeTarefa extends StatelessWidget {
                   ),
               ],
             ),
+            if (_temAcoes) ...<Widget>[
+              const SizedBox(height: AppEspacos.sm),
+              _BotoesDeMover(
+                tarefa: tarefa,
+                aoAvancar: aoAvancar,
+                aoVoltar: aoVoltar,
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Os dois botoes que fazem a tarefa caminhar pelo quadro.
+///
+/// Cada um so fica ativo quando existe coluna para aquele lado (regra de
+/// negocio 2: uma coluna por vez, sem pulo). Na ponta do quadro o botao aparece
+/// **desabilitado**, e nao some: sumir faria os botoes dancarem de lugar a cada
+/// movimento, e quem usa perderia a referencia.
+class _BotoesDeMover extends StatelessWidget {
+  const _BotoesDeMover({
+    required this.tarefa,
+    required this.aoAvancar,
+    required this.aoVoltar,
+  });
+
+  final Tarefa tarefa;
+  final VoidCallback? aoAvancar;
+  final VoidCallback? aoVoltar;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool podeVoltar = tarefa.status.temAnterior && aoVoltar != null;
+    final bool podeAvancar = tarefa.status.temProxima && aoAvancar != null;
+
+    return Row(
+      children: <Widget>[
+        _BotaoDeMover(
+          icone: Icons.arrow_back,
+          // O rotulo diz para ONDE a tarefa vai, e nao so "voltar": quem usa
+          // leitor de tela nao ve as colunas para deduzir o destino.
+          rotulo: podeVoltar
+              ? 'Voltar "${tarefa.titulo}" para '
+                  '${Status.values[tarefa.status.index - 1].rotulo}'
+              : '"${tarefa.titulo}" ja esta na primeira coluna',
+          aoTocar: podeVoltar ? aoVoltar : null,
+        ),
+        const SizedBox(width: AppEspacos.xs),
+        _BotaoDeMover(
+          icone: Icons.arrow_forward,
+          rotulo: podeAvancar
+              ? 'Avancar "${tarefa.titulo}" para '
+                  '${Status.values[tarefa.status.index + 1].rotulo}'
+              : '"${tarefa.titulo}" ja esta na ultima coluna',
+          aoTocar: podeAvancar ? aoAvancar : null,
+        ),
+      ],
+    );
+  }
+}
+
+/// Um botao de mover, com alvo de toque de 48 dp e rotulo para leitor de tela.
+class _BotaoDeMover extends StatelessWidget {
+  const _BotaoDeMover({
+    required this.icone,
+    required this.rotulo,
+    required this.aoTocar,
+  });
+
+  final IconData icone;
+  final String rotulo;
+  final VoidCallback? aoTocar;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: AppEspacos.alvoDeToque,
+      height: AppEspacos.alvoDeToque,
+      child: IconButton(
+        onPressed: aoTocar,
+        icon: Icon(icone),
+        // tooltip vira o rotulo do leitor de tela E a dica de quem usa mouse.
+        tooltip: rotulo,
       ),
     );
   }

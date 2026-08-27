@@ -8,6 +8,7 @@ import 'package:garapuvu_kanban/src/data/repositorio_de_tarefas.dart';
 import 'package:garapuvu_kanban/src/features/board/state/quadro_controller.dart';
 import 'package:garapuvu_kanban/src/features/board/view/tela_inicial.dart';
 import 'package:garapuvu_kanban/src/features/board/view/tela_lista_de_tarefas.dart';
+import 'package:garapuvu_kanban/src/features/board/view/tela_quadro.dart';
 
 import 'suporte_de_tela.dart';
 
@@ -45,7 +46,7 @@ void main() {
 
       expect(find.text('Garapuvu Kanban'), findsOneWidget);
       expect(find.text('Quadro do time Garapuvu'), findsOneWidget);
-      expect(find.textContaining('Prompt 5 concluido'), findsOneWidget);
+      expect(find.textContaining('Prompt 6 concluido'), findsOneWidget);
     });
 
     testWidgets('lista as quatro colunas na ordem da regra de negocio',
@@ -65,6 +66,16 @@ void main() {
           reason: 'A coluna "$coluna" precisa aparecer escrita, nao so em cor.',
         );
       }
+    });
+
+    testWidgets('leva para o quadro', (WidgetTester tester) async {
+      await montarTela(tester, const TelaInicial(), quadro: quadro);
+
+      await tester.tap(find.text(TelaQuadro.titulo));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TelaQuadro), findsOneWidget);
+      expect(find.byType(BackButton), findsOneWidget);
     });
 
     testWidgets('leva para a lista de tarefas', (WidgetTester tester) async {

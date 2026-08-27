@@ -336,6 +336,29 @@
 - **Teste de espaçamento** — compara os retângulos de dois elementos vizinhos e
   exige folga maior que 0,5 dp entre eles (regra 6.5).
 
+## Do quadro (Prompt 6)
+
+- **WIP (*Work In Progress*)** — quanta coisa está em andamento ao mesmo tempo.
+  Aqui o limite é **3 por pessoa** na coluna "Fazendo".
+- **Lei de Little** — a conta que explica o limite: `tempo de ciclo = WIP ÷
+  vazão`. Com o time trabalhando no mesmo ritmo, dobrar as tarefas em andamento
+  **dobra** o tempo que cada uma leva para terminar — sem ninguém ter ficado
+  mais lento.
+- **Política explícita** — a quarta prática do Kanban: a regra fica **escrita
+  onde ela vale**, e não escondida até alguém esbarrar nela. É por isso que
+  "Ate 3 por pessoa" aparece embaixo do nome da coluna.
+- **Sistema puxado** — trabalho novo só entra quando há capacidade, em vez de
+  ser empurrado para cima de quem já está cheio.
+- **Rolagem horizontal** — as colunas correm para o lado. A largura de cada uma
+  deixa a próxima **espiando** na borda: é assim que se descobre que há mais
+  coisa lá.
+- **`find.byTooltip`** — no teste, acha o `Tooltip` (a dica que aparece ao parar
+  o mouse em cima), e não o botão que o contém. Para chegar ao botão usa-se
+  `find.ancestor`.
+- **`Semantics` de destino** — o rótulo do botão diz **para onde** a tarefa vai
+  ("Avançar ... para Fazendo"), porque quem usa leitor de tela não vê as colunas
+  para deduzir isso.
+
 ## Do ambiente (quando o build quebra sem ninguém ter mexido no código)
 
 - **SDK do Flutter** — a pasta com o Flutter inteiro (o comando `flutter`, as

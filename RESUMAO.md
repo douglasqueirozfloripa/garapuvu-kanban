@@ -112,9 +112,24 @@ O que já existe:
   e oferece o botão de criar a primeira, em vez de deixar a pessoa olhando para
   o nada.
 
-O que **ainda não existe**: o quadro em colunas. Dá para ver a lista e criar
-tarefas, mas ainda não dá para **mover** uma tarefa de "A fazer" para "Fazendo"
-— isso é o Prompt 6.
+- **O quadro.** É o coração do app. As quatro colunas ficam lado a lado e
+  correm para o lado quando não cabem na tela — cada coluna deixa a próxima
+  espiando na borda, para ninguém achar que acabou ali. Cada cartão tem duas
+  setas: uma leva a tarefa para a coluna seguinte, outra traz de volta, sempre
+  **uma coluna por vez**. Voltar não é fracasso: no Kanban é informação sobre o
+  fluxo, como quando a revisão pede um ajuste. E quando a tarefa chega na ponta,
+  a seta fica apagada em vez de sumir, para os botões não dançarem de lugar.
+- **O limite de trabalho em andamento.** A coluna "Fazendo" aceita no máximo
+  três tarefas **por pessoa**, e diz isso escrito embaixo do próprio nome — a
+  regra não fica escondida esperando alguém esbarrar nela. Quando alguém tenta
+  pegar a quarta, o app **explica**: diz quem já está com três, qual é o limite,
+  por que ele existe (quanto mais coisas ao mesmo tempo, mais devagar cada uma
+  acaba) e o que fazer — terminar ou devolver uma antes de começar outra. Nada é
+  bloqueado em silêncio.
+
+O que **ainda não existe**: os números da sprint (quantas tarefas em cada
+coluna, quanto foi concluído), os filtros e o botão de apagar. Isso vem dos
+Prompts 7 a 10.
 
 ## Como o projeto avança
 
@@ -128,8 +143,8 @@ Um passo de cada vez, sempre no mesmo formato:
 
 ## Próximo passo
 
-**Prompt 6 — o quadro Kanban.** A lista já mostra o que é mais urgente, mas as
-tarefas ainda não **andam**: não dá para dizer "comecei isto" nem "terminei
-aquilo". O próximo passo monta o quadro em colunas, com a tarefa avançando e
-voltando uma coluna por vez — e com o limite de três tarefas em andamento por
-pessoa avisando, e explicando o porquê, quando alguém tenta pegar a quarta.
+**Prompt 7 — o painel da sprint.** O quadro mostra *onde* cada tarefa está, mas
+não responde de cabeça "como estamos?". O próximo passo monta o painel com os
+números do período: quantas tarefas em cada coluna, quantas já foram concluídas
+e quanto ainda falta — para a reunião de acompanhamento começar com todo mundo
+olhando para o mesmo lugar.

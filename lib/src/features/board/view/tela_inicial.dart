@@ -2,25 +2,27 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tela_contraste.dart';
+import '../model/status.dart';
 import '../widgets/quantas_guardadas.dart';
 import 'abrir_cadastro_de_tarefa.dart';
 import 'tela_cadastro_tarefa.dart';
 import 'tela_lista_de_tarefas.dart';
+import 'tela_quadro.dart';
 
-/// Tela inicial provisoria do Garapuvu Kanban.
+/// A porta de entrada do Garapuvu Kanban.
 ///
-/// O projeto esta no **Prompt 0** do roteiro (`PROMPTS.md`): a documentacao e o
-/// ferramental existem, mas o quadro ainda nao foi construido. Esta tela cumpre
-/// tres papeis:
+/// A partir do **Prompt 6** o quadro de verdade existe, e esta tela deixou de
+/// ser um cartaz para virar um **hub**: ela apresenta o app a quem abre pela
+/// primeira vez e leva as telas que ja funcionam — o quadro (a acao
+/// principal), o cadastro, a lista por prioridade e o relatorio de contraste.
 ///
-/// 1. provar que o app compila e roda em todas as plataformas;
-/// 2. mostrar em qual passo o projeto esta, para quem abre o app pela primeira
-///    vez nao ficar sem saber o que aconteceu;
-/// 3. servir de referencia viva das regras de layout do projeto:
-///    rolagem em vez de corte, [Wrap] em vez de linha rigida e
-///    [Semantics] em tudo que importa.
+/// Ela tambem serve de referencia viva das regras de layout do projeto:
+/// rolagem em vez de corte, [Wrap] em vez de linha rigida e [Semantics] em tudo
+/// que importa.
 ///
-/// Ela sera substituida pelo quadro real no **Prompt 6**.
+/// O cartao do passo atual sai no **Prompt 12**, junto do README final: ate la
+/// ele e o que conta a quem abre o app em que ponto do roteiro o projeto
+/// esta.
 class TelaInicial extends StatelessWidget {
   /// Cria a tela inicial provisoria.
   const TelaInicial({super.key});
@@ -127,16 +129,15 @@ class _CartaoProximoPasso extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Passo atual: Prompt 5 concluido',
+              'Passo atual: Prompt 6 concluido',
               style: tema.textTheme.titleMedium,
             ),
             const SizedBox(height: AppEspacos.sm),
             Text(
-              'A lista ja mostra as tarefas em ordem de prioridade, com o '
-              'estado vazio explicando o que fazer. Toque em '
-              '"${TelaListaDeTarefas.titulo}" para ver. O proximo passo do '
-              'roteiro e o Prompt 6: o quadro em colunas, onde a tarefa avanca '
-              'e volta de status.',
+              'O quadro esta de pe: as tarefas caminham entre as quatro '
+              'colunas, uma por vez, e a coluna "${Status.fazendo.rotulo}" '
+              'avisa quando alguem passa do limite combinado. O proximo passo '
+              'do roteiro e o Prompt 7: o painel com os numeros da sprint.',
               style: tema.textTheme.bodyMedium,
             ),
             const SizedBox(height: AppEspacos.sm),
@@ -167,6 +168,18 @@ class _Acoes extends StatelessWidget {
         SizedBox(
           height: AppEspacos.alvoDeToque,
           child: FilledButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (BuildContext _) => const TelaQuadro(),
+              ),
+            ),
+            icon: const Icon(Icons.view_kanban),
+            label: const Text(TelaQuadro.titulo),
+          ),
+        ),
+        SizedBox(
+          height: AppEspacos.alvoDeToque,
+          child: OutlinedButton.icon(
             onPressed: () => abrirCadastroDeTarefa(context),
             icon: const Icon(Icons.add),
             label: const Text(TelaCadastroTarefa.titulo),

@@ -342,6 +342,58 @@ void main() {
     });
   });
 
+  // O caminho inteiro do cartao, ida e volta. Os testes acima conferem UM
+  // passo de cada vez; este confere que os passos se encaixam — que a tarefa
+  // atravessa o quadro e consegue desfazer todo o caminho.
+  group('ciclo completo', () {
+    test('a tarefa vai ate a ultima coluna e volta ate a primeira', () async {
+      final QuadroController c = await _controller(
+        jaGravadas: <Tarefa>[_tarefa('t')],
+      );
+      await c.carregar();
+
+      final List<Status> ida = <Status>[];
+      while (await c.avancar('t')) {
+        ida.add(c.tarefas.single.status);
+      }
+
+      expect(
+        ida,
+        <Status>[Status.fazendo, Status.emRevisao, Status.concluido],
+        reason: 'Uma coluna por vez, sem pulo (regra de negocio 2).',
+      );
+
+      final List<Status> volta = <Status>[];
+      while (await c.voltar('t')) {
+        volta.add(c.tarefas.single.status);
+      }
+
+      expect(
+        volta,
+        <Status>[Status.emRevisao, Status.fazendo, Status.aFazer],
+        reason: 'Voltar nao e fracasso: e informacao sobre o fluxo.',
+      );
+    });
+
+    test('o caminho inteiro sobrevive a fechar e reabrir o app', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final RepositorioDeTarefas repo = RepositorioDeTarefas(
+        preferencias: await SharedPreferences.getInstance(),
+      );
+      final QuadroController c = QuadroController(repositorio: repo);
+      await c.carregar();
+      await c.adicionar(_tarefa('t'));
+      await c.avancar('t');
+      await c.avancar('t');
+
+      final QuadroController depoisDeReabrir =
+          QuadroController(repositorio: repo);
+      await depoisDeReabrir.carregar();
+
+      expect(depoisDeReabrir.tarefas.single.status, Status.emRevisao);
+    });
+  });
+
   // A ordem da lista e a regra de negocio 4. Ela ja e testada em Dart puro
   // (regras_quadro_test.dart); aqui o que se testa e o CONTRATO do controller:
   // que a tela recebe a lista ja ordenada e nao precisa ordenar de novo.

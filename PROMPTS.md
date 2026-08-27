@@ -563,6 +563,67 @@ voltando de status.
 
 ---
 
+## Prompt 6 — O quadro Kanban: avançar e voltar status ✅ executado
+
+```
+Rode o Prompt 6: o quadro. Monte a tela de colunas (A fazer / Fazendo / Em revisão
+/ Concluído) com rolagem horizontal, e os botões de avançar e voltar em cada card
+(com Semantics dizendo para qual coluna vai). Aplique o limite de WIP: ao estourar,
+mostrar mensagem que explica o porquê e oferece o que fazer, sem bloquear em
+silêncio. Widget tests do ciclo completo ida e volta + 3 tamanhos + espaçamento +
+screenshot.
+```
+
+**Resultado:** o coração do app está de pé — a tarefa caminha pelas quatro
+colunas, uma por vez, para frente e para trás. Placar: **207 testes verdes**
+(22 novos). Prints em `docs/screenshots/p6-quadro-colunas.png` e
+`p6-quadro-limite-de-wip.png`.
+
+### Decisões de projeto
+
+| Decisão | Por quê |
+| --- | --- |
+| Colunas com **rolagem horizontal**, e não espremidas | Quatro colunas na largura de um telefone deixariam cada cartão com poucos caracteres de título. Um quadro que não se lê não serve para nada |
+| A largura da coluna sempre deixa a próxima **espiando** | É assim que quem usa descobre que há mais colunas para o lado. Em 320 dp ela encolhe; em tablet ela para de crescer, porque cartão largo demais cansa de ler |
+| Na ponta do quadro o botão fica **desabilitado**, e não some | Sumir faria os botões dançarem de lugar a cada movimento, e quem usa perderia a referência |
+| O rótulo do botão diz **para onde** a tarefa vai | "Avançar 'Levar doações' para Fazendo" — quem usa leitor de tela não vê as colunas para deduzir o destino |
+| O cartão do quadro **não repete** a coluna | O cabeçalho já diz; repetir gastaria a largura que os títulos precisam. É o `mostrarColuna: false` |
+| O limite de WIP fica **escrito** na coluna `Fazendo` | Políticas explícitas são a quarta prática do Kanban. Esconder a regra até alguém esbarrar nela seria o contrário disso |
+| Cada coluna vazia tem o **seu** recado | "Vazio" quer dizer coisas diferentes em cada etapa: nada para começar, ninguém trabalhando, nada esperando conferência, nada concluído |
+| A tela inicial **continua existindo**, como hub | O comentário do Prompt 0 dizia que ela seria substituída aqui. Ela virou a porta de entrada que leva às telas que já funcionam, e o cartão do passo atual sai no Prompt 12, junto do README final |
+
+### O que o teste de widget cobre
+
+O **ciclo completo ida e volta** pedido pelo prompt: a tarefa é empurrada até
+`Concluído` e puxada de volta até `A fazer`, conferindo o status a cada passo.
+Mais o limite de WIP barrando a quarta tarefa da mesma pessoa (e deixando passar
+a de outra pessoa), os botões desabilitados nas duas pontas, a política escrita
+na coluna, os recados das colunas vazias, a rolagem horizontal chegando à última
+coluna, folga entre cartões, três tamanhos, fonte a 200% e as diretrizes de
+acessibilidade.
+
+### Dois detalhes que os testes ensinaram
+
+1. **`find.byTooltip` devolve o `Tooltip`, não o botão.** O `IconButton`
+   constrói o tooltip por dentro; para tocar no botão e ler o `onPressed` é
+   preciso subir com `find.ancestor`.
+2. **Em 768 dp as duas últimas colunas nascem fora da tela**, e um `ListView`
+   horizontal não constrói o que não aparece. Os testes de *comportamento*
+   passaram a usar uma tela larga, e a rolagem ganhou um teste só dela — que é
+   mais honesto do que fingir que cabe tudo.
+
+### Sobre os prints
+
+Os dados dos prints foram digitados no emulador via `adb`, e duas armadilhas
+apareceram: o `adb input text` às vezes **perde o último caractere** (daí o
+espaço no fim de cada texto, que o formulário remove com `trim()`), e o painel
+flutuante do teclado cobre o botão "Alta" — por isso as tarefas dos prints
+ficaram em "Media" e "Baixa".
+
+**Próximo passo:** Prompt 7 — o painel com os indicadores da sprint.
+
+---
+
 ## Equivalências web → Flutter (por que o roteiro mudou de ferramenta)
 
 O roteiro original do ia-na-pratica é web. Este projeto é Flutter. As **regras**
@@ -879,7 +940,7 @@ implemente ainda — só o plano, para eu escolher os 3 primeiros.
 - [x] **Prompt 4** — persistência (`shared_preferences`).
 - [x] **Conserto 4.1** — build do Android consertado (dois SDKs do Flutter brigando).
 - [x] **Prompt 5** — lista por prioridade.
-- [ ] **Prompt 6** — quadro Kanban (avança/volta).
+- [x] **Prompt 6** — quadro Kanban (avança/volta).
 - [ ] **Prompt 7** — dashboard.
 - [ ] **Prompt 8** — filtros persistidos.
 - [ ] **Prompt 9** — ações destrutivas com confirmação.
